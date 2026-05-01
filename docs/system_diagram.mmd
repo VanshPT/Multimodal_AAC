@@ -1,0 +1,50 @@
+flowchart TD
+    A[User opens AAC Session page] --> B[Select user]
+    B --> C[START button]
+    C --> D[Create session_id + load LTM/STM/PB]
+
+    D --> E{Camera toggle ON?}
+    E -- No --> F[face_signals = null]
+    E -- Yes --> G[Webcam preview + face detection]
+    G --> H{Face detected?}
+    H -- No --> F
+    H -- Yes --> I[face_signals dict]
+
+    D --> J{Mode}
+    J --> K[Normal mode: partner text send]
+    J --> L[SPEAK button]
+
+    subgraph Normal Pipeline
+      K --> N1[FaceCueNode]
+      N1 --> N2[RouterNode: Personal/Contextual/Open-domain]
+      N2 --> N3[SourcePriorityPlannerNode]
+      N3 --> N4[RetrieveFromPoolNode with fallback]
+      N4 --> N5[EvidenceRefiner + CoverageCheck]
+      N5 --> N6[GroundednessGuardNode]
+      N6 --> N7[CandidateGeneratorNode]
+      N7 --> N8[Exactly 3 options]
+    end
+
+    subgraph Speak Pipeline
+      L --> S1[FaceCueNode]
+      S1 --> S2[SpeakPlannerNode]
+      S2 --> S3[Generate 20-30 grouped suggestions]
+      S3 --> S4[Today / Next few days / Reminders / People-topics]
+    end
+
+    N8 --> Q[Select or edit custom response]
+    S4 --> Q
+    Q --> R[Confirm gate]
+    R --> T[Final Spoken Output area + transcript]
+
+    R --> U{Memory Update toggle ON?}
+    U -- No --> V[No memory mutation]
+    U -- Yes --> W[Memory Update Subgraph]
+    W --> W1[PB weight boost or new exemplar]
+    W --> W2[STM recent_turn + situation_hint]
+    W --> W3[LTM requires approval placeholder]
+
+    N2 --> X[Debug panel router label]
+    N3 --> Y[Debug panel search order]
+    N4 --> Z[Debug panel sources + latency]
+    I --> AA[Debug panel face cue summary]

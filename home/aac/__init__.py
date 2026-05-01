@@ -1,0 +1,1 @@
+"""AAC assistant package."""

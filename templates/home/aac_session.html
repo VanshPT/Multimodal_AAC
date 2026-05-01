@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAC Session</title>
+    <style>
+        body {
+            font-family: "Inter", "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            color: #1d2433;
+            background: radial-gradient(circle at top left, #eef3ff 0%, #f6f8fc 45%, #f9fbff 100%);
+        }
+        .container {
+            max-width: 1480px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(780px, 1fr) 360px;
+            gap: 18px;
+            padding: 18px;
+        }
+        .panel {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #dfe6f4;
+            box-shadow: 0 10px 30px rgba(23, 52, 110, 0.08);
+        }
+        .main-panel { overflow: hidden; }
+        .side-panel { position: sticky; top: 14px; height: fit-content; }
+        .header-block {
+            background: linear-gradient(130deg, #2f5bda 0%, #4c7af0 45%, #6995ff 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+        .header-title {
+            margin: 0;
+            font-size: 1.25rem;
+            letter-spacing: 0.2px;
+        }
+        .header-subtitle {
+            margin-top: 6px;
+            opacity: 0.95;
+            font-size: 0.92rem;
+        }
+        h3 {
+            margin: 16px 0 8px;
+            font-size: 1.06rem;
+            color: #22314f;
+        }
+        .topbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #e3e9f6;
+            border-radius: 10px;
+            background: #fbfdff;
+        }
+        .topbar label {
+            font-size: 0.92rem;
+            color: #2f3d58;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .topbar button, .topbar select {
+            padding: 8px 11px;
+            border-radius: 9px;
+            border: 1px solid #bbc8e0;
+            background: #ffffff;
+            color: #1f2c45;
+        }
+        .topbar button { cursor: pointer; font-weight: 600; }
+        #startBtn, #sendPartnerBtn, #speakBtn, #confirmBtn {
+            background: #335fda;
+            color: #ffffff;
+            border-color: #335fda;
+        }
+        #startBtn:hover, #sendPartnerBtn:hover, #speakBtn:hover, #confirmBtn:hover {
+            background: #2b52c1;
+            border-color: #2b52c1;
+        }
+        .row { display: flex; gap: 8px; margin-bottom: 8px; }
+        textarea, input[type="text"] {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #bfcbdf;
+            padding: 9px 10px;
+            font-size: 0.95rem;
+            background: #ffffff;
+            color: #1d2433;
+        }
+        textarea:focus, input[type="text"]:focus, select:focus {
+            outline: 2px solid #adc2ff;
+            border-color: #7a9aff;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .card {
+            border: 1px solid #dbe4f5;
+            border-radius: 12px;
+            padding: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+            font-size: 0.98rem;
+            line-height: 1.4rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            transition: transform 0.14s ease, box-shadow 0.14s ease;
+        }
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(30, 65, 140, 0.08);
+        }
+        .card button {
+            margin-top: 9px;
+            width: 100%;
+            padding: 7px;
+            border: 0;
+            border-radius: 7px;
+            background: #4263eb;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .sticky-edit {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            padding: 8px 0 2px;
+            z-index: 2;
+            border-top: 1px solid #eef2fb;
+            border-bottom: 1px solid #eef2fb;
+            margin: 12px 0;
+        }
+        .group h4 { margin-bottom: 6px; color: #26334f; }
+        .group-header { display: flex; justify-content: space-between; align-items: center; }
+        .group-header button {
+            border: 1px solid #bfcbe2;
+            background: #fff;
+            border-radius: 8px;
+            padding: 5px 8px;
+            cursor: pointer;
+        }
+        .group-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px;
+            border: 1px solid #e3e9f6;
+            border-radius: 8px;
+            background: #fcfdff;
+        }
+        .group-item button {
+            min-width: 74px;
+            border: 0;
+            border-radius: 7px;
+            background: #2f5ad7;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        video {
+            width: 280px;
+            height: 205px;
+            border-radius: 12px;
+            background: #1d2433;
+            border: 1px solid #cad4e7;
+        }
+        .chip {
+            display: inline-block;
+            background: #eef2ff;
+            border: 1px solid #ccd6ff;
+            border-radius: 14px;
+            padding: 3px 9px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+            color: #304162;
+        }
+        .muted { color: #687086; font-size: 0.92rem; }
+        .error-banner {
+            display: none;
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #f3b2b2;
+            background: #fff0f0;
+            color: #8b1f1f;
+        }
+        .final-output {
+            border: 1px solid #c5f0cf;
+            background: #edfff2;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+        .transcript {
+            max-height: 230px;
+            overflow-y: auto;
+            border: 1px solid #d6dded;
+            border-radius: 10px;
+            padding: 8px;
+            background: #fff;
+        }
+        .section-box {
+            border: 1px solid #e5ebf8;
+            border-radius: 10px;
+            padding: 10px;
+            background: #fbfdff;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 1200px) {
+            .container { grid-template-columns: 1fr; }
+            .side-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="panel main-panel">
+            <div class="header-block">
+                <h2 class="header-title">AAC Session Console</h2>
+                <div class="header-subtitle">Memory-grounded reply generation with multimodal face and gesture cues</div>
+            </div>
+            <div id="llmErrorBanner" class="error-banner"></div>
+            <div class="topbar">
+                <label>User:
+                    <select id="userSelect">
+                        {% for user in users %}
+                        <option value="{{ user }}">{{ user }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button id="startBtn">START</button>
+                <label><input type="checkbox" id="cameraToggle"> Camera</label>
+                <label><input type="checkbox" id="memoryToggle"> Memory Update</label>
+                <label><input type="checkbox" id="simulateFaceToggle"> Sim Face</label>
+                <select id="simulateFacePreset">
+                    <option value="smile">smile</option>
+                    <option value="confused">confused</option>
+                    <option value="neutral">neutral</option>
+                    <option value="nod_yes">nod_yes</option>
+                    <option value="shake_no">shake_no</option>
+                </select>
+                <label><input type="checkbox" id="pbToggle" checked> PB Enabled</label>
+                <button id="speakBtn" disabled>SPEAK</button>
+                <span id="sessionLabel" class="muted">Session not started</span>
+            </div>
+            <div class="topbar">
+                <label>Partner name (optional): <input type="text" id="partnerName" placeholder="e.g., Omer"></label>
+                <span id="liveClock" class="chip">Local time: --</span>
+            </div>
+
+            <div class="section-box row">
+                <div>
+                    <video id="cameraPreview" autoplay playsinline hidden></video>
+                    <div id="faceStatus" class="muted">Camera OFF</div>
+                </div>
+            </div>
+
+            <h3>Normal mode</h3>
+            <div class="section-box row">
+                <input type="text" id="partnerInput" placeholder="Partner message">
+                <button id="sendPartnerBtn">Send Partner Message</button>
+            </div>
+            <div id="normalCards" class="cards"></div>
+
+            <div class="sticky-edit">
+                <h3>Edit / Custom response</h3>
+                <textarea id="customResponse" rows="3" placeholder="Edit or type your own response..."></textarea>
+                <button id="confirmBtn">Confirm (✓)</button>
+                <div id="finalOutput" class="final-output">Final Output: (none)</div>
+            </div>
+
+            <h3>Speak mode suggestions</h3>
+            <div id="speakSuggestions" class="section-box"></div>
+
+            <h3>Transcript</h3>
+            <div id="transcript" class="transcript"></div>
+
+            <h3>Metrics</h3>
+            <div class="transcript">
+                <table style="width:100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border:1px solid #d6dded; padding:4px;">Event</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Partner</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Latency ms</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Grounded</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Unsupported</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Sources/Chunks</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Camera/Face</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Edit Dist</th>
+                            <th style="border:1px solid #d6dded; padding:4px;">Acceptance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metricsRows"></tbody>
+                </table>
+                <div style="margin-top:8px;"><a href="/metrics/">Open full metrics page</a></div>
+            </div>
+        </section>
+        <aside class="panel side-panel">
+            <h3>Debug / Explainability</h3>
+            <div><span class="chip">Router</span><span id="dbgRouter">-</span></div>
+            <div><span class="chip">Sources</span><span id="dbgSources">-</span></div>
+            <div><span class="chip">Partner</span><span id="dbgPartner">-</span></div>
+            <div><span class="chip">Camera used</span><span id="dbgCamera">-</span></div>
+            <div><span class="chip">Face cue</span><span id="dbgFace">-</span></div>
+            <div><span class="chip">Face detected</span><span id="dbgFaceDetected">-</span></div>
+            <div><span class="chip">Smile score</span><span id="dbgSmileScore">-</span></div>
+            <div><span class="chip">Nod score</span><span id="dbgNodScore">-</span></div>
+            <div><span class="chip">Shake score</span><span id="dbgShakeScore">-</span></div>
+            <div><span class="chip">Negative score</span><span id="dbgNegativeScore">-</span></div>
+            <div><span class="chip">Search order</span><span id="dbgOrder">-</span></div>
+            <div><span class="chip">Buckets</span><span id="dbgBuckets">-</span></div>
+            <div><span class="chip">Latency</span><span id="dbgLatency">-</span></div>
+            <div><span class="chip">Groundedness</span><span id="dbgGrounded">-</span></div>
+            <div><span class="chip">Hallucination</span><span id="dbgHall">-</span></div>
+            <div><span class="chip">Evidence size</span><span id="dbgEvidence">-</span></div>
+            <div><span class="chip">LLM</span><span id="dbgLLM">-</span></div>
+            <div id="dbgNotes" class="muted" style="margin-top: 10px;"></div>
+        </aside>
+    </div>
+
+<script>
+let sessionId = null;
+let selectedText = "";
+let lastPartnerText = "";
+let latestFaceSignals = null;
+let stream = null;
+let faceLandmarker = null;
+let faceLandmarkerReady = false;
+let faceLandmarkerFailed = false;
+let faceInitError = "";
+let faceEngine = "none";
+let facePollingTimer = null;
+let headHistory = [];
+let lastQueryId = "";
+const transcript = [];
+let metricsHistory = [];
+
+function localNowIso() {
+    return new Date().toISOString();
+}
+
+function startClock() {
+    const el = document.getElementById("liveClock");
+    if (!el) return;
+    const render = () => {
+        const now = new Date();
+        el.innerText = `Local time: ${now.toLocaleString()}`;
+    };
+    render();
+    window.setInterval(render, 1000);
+}
+
+function smoothFaceSignals(raw) {
+    if (!raw) return null;
+    if (!latestFaceSignals) return raw;
+    const alpha = 0.65;
+    const smooth = {
+        smile_score: alpha * (latestFaceSignals.smile_score ?? latestFaceSignals.smile_prob ?? 0) + (1 - alpha) * (raw.smile_score ?? raw.smile_prob ?? 0),
+        confused_prob: alpha * latestFaceSignals.confused_prob + (1 - alpha) * raw.confused_prob,
+        neutral_prob: alpha * latestFaceSignals.neutral_prob + (1 - alpha) * raw.neutral_prob
+    };
+    const total = smooth.smile_score + smooth.confused_prob + smooth.neutral_prob || 1;
+    smooth.smile_score /= total;
+    smooth.confused_prob /= total;
+    smooth.neutral_prob /= total;
+    smooth.face_detected = raw.face_detected ?? true;
+    smooth.smile_prob = smooth.smile_score;
+    return smooth;
+}
+
+async function postJSON(url, body) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+        body: JSON.stringify(body)
+    });
+    return response.json();
+}
+
+async function initMediaPipeFace() {
+    if (faceLandmarkerReady || faceLandmarkerFailed) return;
+    try {
+        let visionApi = window.vision || null;
+        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
+            const moduleRef = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14");
+            visionApi = moduleRef.vision || moduleRef;
+        }
+        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
+            throw new Error("MediaPipe tasks-vision did not expose FaceLandmarker");
+        }
+        const fileset = await visionApi.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+        faceLandmarker = await visionApi.FaceLandmarker.createFromOptions(fileset, {
+            baseOptions: {
+                modelAssetPath:
+                    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            },
+            outputFaceBlendshapes: true,
+            runningMode: "VIDEO",
+            numFaces: 1,
+        });
+        faceLandmarkerReady = true;
+        faceEngine = "mediapipe";
+        faceInitError = "";
+    } catch (error) {
+        faceLandmarkerFailed = true;
+        faceInitError = error?.message || String(error);
+        faceEngine = "fallback";
+    }
+}
+
+function getCSRFToken() {
+    const cookie = document.cookie.split("; ").find(x => x.startsWith("csrftoken="));
+    return cookie ? cookie.split("=")[1] : "";
+}
+
+function renderDebug(info) {
+    document.getElementById("dbgRouter").innerText = info.router_label || "-";
+    document.getElementById("dbgSources").innerText = (info.sources_used || []).join(", ");
+    document.getElementById("dbgPartner").innerText = info.partner_detected || "-";
+    document.getElementById("dbgCamera").innerText = info.camera_used ? "yes" : "no";
+    document.getElementById("dbgFace").innerText = info.face_summary || "-";
+    document.getElementById("dbgFaceDetected").innerText = info.face_detected ? "yes" : "no";
+    document.getElementById("dbgSmileScore").innerText = info.smile_score ?? "-";
+    if (document.getElementById("dbgNodScore")) {
+        document.getElementById("dbgNodScore").innerText = info.nod_score ?? "-";
+    }
+    if (document.getElementById("dbgShakeScore")) {
+        document.getElementById("dbgShakeScore").innerText = info.shake_score ?? "-";
+    }
+    if (document.getElementById("dbgNegativeScore")) {
+        document.getElementById("dbgNegativeScore").innerText = info.negative_score ?? "-";
+    }
+    document.getElementById("dbgOrder").innerText = (info.search_order || []).join(" -> ");
+    document.getElementById("dbgBuckets").innerText = (info.buckets_chosen || []).join(", ");
+    document.getElementById("dbgLatency").innerText = `${info.latency_ms || 0} ms`;
+    document.getElementById("dbgGrounded").innerText = info.groundedness_score ?? "-";
+    document.getElementById("dbgHall").innerText = info.hallucination_flag ? "yes" : "no";
+    document.getElementById("dbgEvidence").innerText = info.evidence_size ?? "-";
+    document.getElementById("dbgLLM").innerText = info.llm_enabled ? `enabled (${info.model_used || "-"})` : "off";
+    document.getElementById("dbgNotes").innerText = (info.notes || []).join(" | ");
+    const banner = document.getElementById("llmErrorBanner");
+    if (info.llm_error) {
+        banner.style.display = "block";
+        banner.innerText = info.llm_error;
+    } else {
+        banner.style.display = "none";
+        banner.innerText = "";
+    }
+}
+
+function renderMetrics(rows) {
+    metricsHistory = rows || metricsHistory;
+    const body = document.getElementById("metricsRows");
+    body.innerHTML = "";
+    metricsHistory.slice(-20).reverse().forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td style="border:1px solid #d6dded; padding:4px;">${row.event_type || "normal"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.partner_detected || "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.latency_ms ?? "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.groundedness_score ?? "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.unsupported_claims_count ?? "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${(row.retrieval_stats?.sources_used || []).join(",")} / ${row.retrieval_stats?.chunks_used ?? "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.camera_used ? "yes" : "no"} / ${row.face_summary || "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.edit_distance ?? "-"}</td>
+            <td style="border:1px solid #d6dded; padding:4px;">${row.acceptance ?? "-"}</td>
+        `;
+        body.appendChild(tr);
+    });
+}
+
+function renderNormalOptions(options) {
+    const cards = document.getElementById("normalCards");
+    cards.innerHTML = "";
+    options.slice(0, 3).forEach((text) => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<div>${text}</div><button>Select</button>`;
+        div.querySelector("button").onclick = () => {
+            selectedText = text;
+            document.getElementById("customResponse").value = text;
+        };
+        cards.appendChild(div);
+    });
+}
+
+function renderSpeakSuggestions(grouped) {
+    const target = document.getElementById("speakSuggestions");
+    target.innerHTML = "";
+    Object.entries(grouped).forEach(([group, items]) => {
+        const wrap = document.createElement("div");
+        wrap.className = "group";
+        const listId = `group-${group.replace(/[^a-z0-9]/gi, "")}`;
+        wrap.innerHTML = `<div class="group-header"><h4>${group}</h4><button data-target="${listId}">Collapse</button></div><div id="${listId}"></div>`;
+        const container = wrap.querySelector(`#${listId}`);
+        const toggle = wrap.querySelector("button");
+        toggle.onclick = () => {
+            const hidden = container.style.display === "none";
+            container.style.display = hidden ? "block" : "none";
+            toggle.textContent = hidden ? "Collapse" : "Expand";
+        };
+        items.forEach((text) => {
+            const row = document.createElement("div");
+            row.className = "group-item";
+            row.innerHTML = `<div style="flex:1">${text}</div><button>Select</button>`;
+            row.querySelector("button").onclick = () => {
+                selectedText = text;
+                document.getElementById("customResponse").value = text;
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            };
+            container.appendChild(row);
+        });
+        target.appendChild(wrap);
+    });
+}
+
+function renderTranscript() {
+    const box = document.getElementById("transcript");
+    box.innerHTML = transcript.map((item) =>
+        `<div><b>Partner:</b> ${item.partner || "(speak mode)"}<br/><b>Final:</b> ${item.final}</div><hr/>`
+    ).join("");
+}
+
+async function detectFaceSignals() {
+    if (document.getElementById("simulateFaceToggle").checked) {
+        const preset = document.getElementById("simulateFacePreset").value;
+        if (preset === "smile") {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.9, confused_prob: 0.05, neutral_prob: 0.05, nod_score: 0.65, shake_score: 0.1, negative_prob: 0.05 });
+            latestFaceSignals.face_detected = true;
+            document.getElementById("faceStatus").innerText = "Simulated face: smile";
+        } else if (preset === "confused") {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.1, confused_prob: 0.85, neutral_prob: 0.05, nod_score: 0.1, shake_score: 0.3, negative_prob: 0.3 });
+            latestFaceSignals.face_detected = true;
+            document.getElementById("faceStatus").innerText = "Simulated face: confused";
+        } else if (preset === "nod_yes") {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.35, confused_prob: 0.1, neutral_prob: 0.55, nod_score: 0.85, shake_score: 0.08, negative_prob: 0.05 });
+            latestFaceSignals.face_detected = true;
+            document.getElementById("faceStatus").innerText = "Simulated face: nod yes";
+        } else if (preset === "shake_no") {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.05, confused_prob: 0.35, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.86, negative_prob: 0.7 });
+            latestFaceSignals.face_detected = true;
+            document.getElementById("faceStatus").innerText = "Simulated face: shake no";
+        } else {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.1, negative_prob: 0.1 });
+            latestFaceSignals.face_detected = true;
+            document.getElementById("faceStatus").innerText = "Simulated face: neutral";
+        }
+        return latestFaceSignals;
+    }
+    if (!document.getElementById("cameraToggle").checked || !stream) {
+        latestFaceSignals = null;
+        return null;
+    }
+    const status = document.getElementById("faceStatus");
+    const video = document.getElementById("cameraPreview");
+    await initMediaPipeFace();
+    if (!video.videoWidth || !video.videoHeight) {
+        status.innerText = "Camera warming up...";
+        return latestFaceSignals;
+    }
+    if (faceLandmarkerReady && faceLandmarker) {
+        try {
+            const result = faceLandmarker.detectForVideo(video, Date.now());
+            if (result.faceBlendshapes && result.faceBlendshapes.length > 0) {
+                const categories = result.faceBlendshapes[0].categories || [];
+                const scoreFor = (name) => {
+                    const found = categories.find((item) => item.categoryName === name);
+                    return found ? found.score : 0;
+                };
+                const smile = Math.max(scoreFor("mouthSmileLeft"), scoreFor("mouthSmileRight"));
+                const browUp = Math.max(scoreFor("browInnerUp"), scoreFor("browOuterUpLeft"), scoreFor("browOuterUpRight"));
+                const frown = Math.max(scoreFor("mouthFrownLeft"), scoreFor("mouthFrownRight"));
+                const browDown = Math.max(scoreFor("browDownLeft"), scoreFor("browDownRight"));
+                const jawForward = scoreFor("jawForward");
+                const mouthPress = Math.max(scoreFor("mouthPressLeft"), scoreFor("mouthPressRight"));
+                const negative = Math.min(1, Math.max(browDown, mouthPress, jawForward));
+                const confused = Math.max(browUp, frown);
+                const neutral = Math.max(0, 1 - smile - confused);
+                const transform = result.facialTransformationMatrixes && result.facialTransformationMatrixes[0]
+                    ? result.facialTransformationMatrixes[0].data || result.facialTransformationMatrixes[0]
+                    : null;
+                let pitch = 0;
+                let yaw = 0;
+                if (transform && transform.length >= 11) {
+                    const r20 = Number(transform[8]);
+                    const r21 = Number(transform[9]);
+                    const r22 = Number(transform[10]);
+                    const r10 = Number(transform[4]);
+                    const r00 = Number(transform[0]);
+                    pitch = Math.atan2(-r21, r22) * 57.2958;
+                    yaw = Math.atan2(r20, Math.sqrt(r21 * r21 + r22 * r22)) * 57.2958;
+                    if (!Number.isFinite(yaw)) yaw = Math.atan2(-r10, r00) * 57.2958;
+                }
+                headHistory.push({ pitch, yaw, t: Date.now() });
+                if (headHistory.length > 16) headHistory = headHistory.slice(-16);
+                const recent = headHistory.slice(-12);
+                const pitchRange = recent.length ? Math.max(...recent.map((h) => h.pitch)) - Math.min(...recent.map((h) => h.pitch)) : 0;
+                const yawRange = recent.length ? Math.max(...recent.map((h) => h.yaw)) - Math.min(...recent.map((h) => h.yaw)) : 0;
+                const nodScore = Math.max(0, Math.min(1, (pitchRange - 8) / 15));
+                const shakeScore = Math.max(0, Math.min(1, (yawRange - 10) / 18));
+                latestFaceSignals = smoothFaceSignals({
+                    smile_prob: Math.min(1, smile),
+                    confused_prob: Math.min(1, confused),
+                    neutral_prob: Math.min(1, neutral),
+                    negative_prob: Math.min(1, negative),
+                    nod_score: nodScore,
+                    shake_score: shakeScore,
+                    face_detected: true,
+                });
+                status.innerText = `Face detected (MediaPipe blendshapes) nod:${nodScore.toFixed(2)} shake:${shakeScore.toFixed(2)}`;
+                return latestFaceSignals;
+            }
+            status.innerText = "MediaPipe active, face not confidently detected yet";
+        } catch (error) {
+            status.innerText = `MediaPipe detect error: ${error?.message || "unknown error"}`;
+        }
+    }
+    if ("FaceDetector" in window) {
+        try {
+            const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+            const faces = await detector.detect(video);
+            if (faces.length > 0) {
+                const width = faces[0].boundingBox.width || 1;
+                const smileProb = Math.min(1, Math.max(0.2, width / 260));
+                latestFaceSignals = smoothFaceSignals({
+                    smile_prob: smileProb,
+                    confused_prob: 1 - smileProb,
+                    neutral_prob: 0.2,
+                    negative_prob: 0.15,
+                    nod_score: 0.1,
+                    shake_score: 0.1,
+                });
+                latestFaceSignals.face_detected = true;
+                status.innerText = "Face detected";
+            } else {
+                latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
+                status.innerText = "FaceDetector active but low confidence; using neutral fallback";
+            }
+        } catch (error) {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
+            status.innerText = `FaceDetector error; neutral fallback (${error?.message || "unknown"})`;
+        }
+    } else {
+        latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
+        if (faceLandmarkerFailed) {
+            status.innerText = `No FaceDetector API + MediaPipe init failed (${faceInitError || "unknown"}); neutral fallback`;
+        } else if (faceLandmarkerReady) {
+            status.innerText = "No FaceDetector API; MediaPipe running";
+        } else {
+            status.innerText = "No FaceDetector API; detector warming up";
+        }
+    }
+    return latestFaceSignals;
+}
+
+function startFacePolling() {
+    if (facePollingTimer) return;
+    facePollingTimer = window.setInterval(async () => {
+        if (!document.getElementById("cameraToggle").checked) return;
+        try {
+            await detectFaceSignals();
+        } catch (error) {
+            document.getElementById("faceStatus").innerText = `Face polling error: ${error?.message || "unknown"}`;
+        }
+    }, 850);
+}
+
+function stopFacePolling() {
+    if (!facePollingTimer) return;
+    window.clearInterval(facePollingTimer);
+    facePollingTimer = null;
+}
+
+document.getElementById("startBtn").onclick = async () => {
+    const userId = document.getElementById("userSelect").value;
+    const data = await postJSON("/aac/api/start_session/", { user_id: userId });
+    if (data.error) {
+        document.getElementById("sessionLabel").innerText = `Error: ${data.error}`;
+        return;
+    }
+    sessionId = data.session_id;
+    document.getElementById("speakBtn").disabled = false;
+    document.getElementById("sessionLabel").innerText = `Session: ${sessionId}`;
+    document.getElementById("normalCards").innerHTML = "";
+    document.getElementById("speakSuggestions").innerHTML = "";
+    document.getElementById("customResponse").value = "";
+    document.getElementById("finalOutput").innerText = "Final Output: (none)";
+    document.getElementById("partnerInput").value = "";
+    transcript.length = 0;
+    renderTranscript();
+    selectedText = "";
+    lastPartnerText = "";
+    metricsHistory = [];
+    renderMetrics([]);
+};
+
+document.getElementById("cameraToggle").onchange = async (event) => {
+    const video = document.getElementById("cameraPreview");
+    if (event.target.checked) {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            video.hidden = false;
+            document.getElementById("faceStatus").innerText = "Camera ON";
+            await detectFaceSignals();
+            startFacePolling();
+        } catch (error) {
+            stream = null;
+            video.hidden = true;
+            document.getElementById("faceStatus").innerText = "Camera unavailable";
+            stopFacePolling();
+        }
+    } else {
+        latestFaceSignals = null;
+        stopFacePolling();
+        if (stream) {
+            stream.getTracks().forEach((track) => track.stop());
+        }
+        stream = null;
+        video.hidden = true;
+        document.getElementById("faceStatus").innerText = "Camera OFF";
+    }
+};
+
+document.getElementById("sendPartnerBtn").onclick = async () => {
+    if (!sessionId) return alert("Press START first.");
+    const partnerText = document.getElementById("partnerInput").value.trim();
+    if (!partnerText) return alert("Partner message cannot be empty.");
+    lastPartnerText = partnerText;
+    await detectFaceSignals();
+    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const data = await postJSON("/aac/api/partner_message/", {
+        session_id: sessionId,
+        partner_text: partnerText,
+        partner_name: document.getElementById("partnerName").value.trim(),
+        camera_on: cameraEffective,
+        face_signals: latestFaceSignals,
+        pb_enabled: document.getElementById("pbToggle").checked,
+        client_now: localNowIso(),
+    });
+    if (data.error) return alert(data.error);
+    renderNormalOptions(data.options || []);
+    renderDebug(data.debug_info || {});
+    lastQueryId = data.query_id || "";
+    renderMetrics(data.query_metrics_history || []);
+};
+
+document.getElementById("speakBtn").onclick = async () => {
+    if (!sessionId) return alert("Press START first.");
+    await detectFaceSignals();
+    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const data = await postJSON("/aac/api/speak_mode/", {
+        session_id: sessionId,
+        camera_on: cameraEffective,
+        face_signals: latestFaceSignals,
+        client_now: localNowIso(),
+    });
+    if (data.error) return alert(data.error);
+    renderSpeakSuggestions(data.grouped_suggestions || {});
+    renderDebug(data.debug_info || {});
+};
+
+document.getElementById("confirmBtn").onclick = async () => {
+    if (!sessionId) return alert("Press START first.");
+    const finalText = document.getElementById("customResponse").value.trim();
+    if (!finalText) return alert("Type or select a response first.");
+    const data = await postJSON("/aac/api/confirm_response/", {
+        session_id: sessionId,
+        partner_text: lastPartnerText,
+        selected_text: selectedText,
+        final_text: finalText,
+        memory_update_on: document.getElementById("memoryToggle").checked,
+        face_signals: latestFaceSignals,
+        query_id: lastQueryId
+    });
+    if (data.error) return alert(data.error);
+    const ack = data.memory_update_ack ? `\nMemory Ack: ${data.memory_update_ack}` : "";
+    document.getElementById("finalOutput").innerText = `Final Output: ${data.final_output}${ack}`;
+    transcript.push({ partner: lastPartnerText, final: data.final_output });
+    renderTranscript();
+    renderMetrics(data.query_metrics_history || []);
+    selectedText = "";
+};
+
+startClock();
+</script>
+</body>
+</html>

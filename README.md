@@ -1,83 +1,174 @@
+# Multimodal AAC Chatbot (CSE 635 Project 4)
 
-# 🌟 **SoftGo - Starter Kit built on Django Framework** 🌟  
-*Kickstart your software or project development with prebuilt authentication and dashboard features!*  
-
-### 🚀 **What is SoftGo?**  
-SoftGo (Software + Django) is your go-to Django starter kit, designed to help developers—quickly set up the foundational elements of a project or software. With all essential features like login, signup, dynamic user dashboards, running Asynchronous functions in backend, and remember-me functionality, you can skip the repetitive tasks and focus directly on building your actual use case. SoftGo takes care of the groundwork, allowing you to move fast and build smarter!
-
-### 💡 **Why SoftGo?**  
-SoftGo is perfect for those who want to hit the ground running without having to waste time building basic authentication, dashboard management, or user sessions from scratch. If you're a student, hackathon participant, freelancer, or developer looking for a head start in Django-based projects, **SoftGo** is built for you! 💼
-
-### ✨ **Key Features**  
-- 🔐 **Authentication Done Right**: Seamless user registration, login, and logout functionalities, complete with password and email validation.
-- 🛠 **Dynamic Dashboard**: Once logged in, users see a general dashboard with their profile and details dynamically populated from signup data.
-- ⏳ **Persistent Login**: Users who click "Remember Me" stay logged in for **two weeks**, skipping the login process unless they manually log out.
-- 📱 **Responsive Design**: Every page, including the login, registration, and dashboard pages, is fully responsive! 💻 📱
-- 🚪 **Logout and Session Handling**: Easy user session management with built-in Django tools.
-- ⏳ **Asynchronous task Handeling**: Using Django Q, you can now run python functions asynchrnously.
-
-⚠️ **Note for Production**:  
-If you're using **SoftGo** in production, **do not use the Tailwind CDN** (currently used for development). Instead, switch to the **Django-Tailwind package**. You can find the documentation [here](https://django-tailwind.readthedocs.io/en/latest/).
-
-### 🔥 **How to Get Started?**  
-Setting up SoftGo is a breeze! Follow these steps:  
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/VanshPT/SoftGo-Starter-Kit-Quick-Setup-for-Django-Apps.git
-   cd softgo
-   ```
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Run database migrations**:
-   ```bash
-   python manage.py migrate
-   ```
-4. **Start the development server**:
-   ```bash
-   python manage.py runserver
-   ```
-5. **Start Qcluster worker for enabling Asynchronous and Parallel Processing in another terminal**:
-   ```bash
-   python manage.py qcluster
-   ```
-7. **You're all set!** 🎉 Just visit `http://127.0.0.1:8000` to explore SoftGo in action!
-
-### ⚠️ **Known Issue**  
-🚧 **Landing Page Not Fully Responsive**  
-While SoftGo offers a super responsive experience for the **login**, **signup**, and **dashboard** pages, the **landing page** could use some love! If you’re a developer looking to make an open-source contribution, this is a great opportunity to improve your CV! Contributions to the landing page’s design will be highly appreciated. 💡
-
-### 📚 **Documentation**  
-Check out the official [Django documentation](https://docs.djangoproject.com/en/stable/) for more detailed guidance on extending SoftGo to suit your specific use case.
+Training-free, retrieval-based AAC assistant built on Django with:
+- partner chat mode (`Normal mode`)
+- proactive suggestion mode (`Speak mode`)
+- memory update + acknowledgement flow
+- multimodal face/gesture conditioning (smile, confused, nod/shake simulation)
 
 ---
 
-## 🚀 Future Updates & Features
+## 1) Environment Setup
 
-**SoftGo** is just getting started! 🎉 Expect more exciting features and improvements in the future as we continue to enhance this starter kit for quick and easy project development. We aim to bring new features that streamline user experiences and make SoftGo even more powerful for developers and students.
+### Prerequisites
+- Python 3.10+
+- `pip`
+- Webcam access (optional, can use simulated faces)
 
-Some planned updates include:
-- 📈 Advanced analytics dashboard
-- 🔒 Enhanced security features
-- 🛠️ Customizable themes for the dashboard
-- 🌐 Improved landing page responsiveness (open for contributions)
+### Install
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python scripts/generate_synthetic_user.py
+```
 
-## 🌟 Open Source Contributions Welcome!
+### Optional LLM setup (`.env` in repo root)
+```env
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-2.5-flash
+```
 
-We strongly believe in the power of community and open source collaboration. That's why we invite **you** to contribute to **SoftGo**! Whether it's improving the landing page's responsiveness, adding new features, fixing bugs, or suggesting ideas, your contributions are highly valued and will not only help improve **SoftGo**, but also **boost your tech profile**. Contributing to open source is a great way to gain experience, learn new skills, and showcase your work to potential employers.
+Notes:
+- `GEMINI_API_KEY` is preferred.
+- `GOOGLE_API_KEY` is also supported as alias.
 
-If you'd like to get involved:
-- 💡 Fork the repo and create a pull request
-- 📄 Check out the contribution guidelines
-- 🙌 Join the discussion and share your ideas!
+### Start app
+```bash
+python manage.py runserver
+```
+Open: [http://127.0.0.1:8000/aac/](http://127.0.0.1:8000/aac/)
 
 ---
 
-### 📝 **License**  
-SoftGo is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+## 2) Tester UI Settings (important)
+
+Use these exact settings for consistent testing:
+
+1. Click `START`
+2. `User` -> `demo_user`
+3. `Partner name` -> `Omer`
+4. Turn ON:
+   - `Memory Update`
+   - `PB Enabled`
+5. For expression tests:
+   - turn ON `Sim Face`
+   - select one preset from:
+     - `smile`
+     - `confused`
+     - `nod_yes`
+     - `shake_no`
+     - `neutral`
+6. Watch `Local time` chip in UI top bar (clock is live and sent to pipeline context).
 
 ---
 
-### 👤 **Author**  
-*Written by Vansh Thakkar*  
+## 3) General System Test Queries
+
+### A) Core memory-grounding checks
+Send each in `Normal mode`:
+
+1. `Are we still on for the movie tonight at 7?`
+2. `Can we meet before 6:30 at the campus bus stop?`
+3. `Did you finish your CSE 635 slides for the 2:00 check-in?`
+4. `Do you want a reminder for evening medication at 8:30?`
+5. `Are we still doing cricket at 1 PM on Sunday?`
+
+Expected:
+- Replies should include concrete details from memory (time/place/plan), not only generic yes/no.
+
+### B) Binary polarity test with face gestures
+Use the same query multiple times while changing preset:
+
+Query:
+- `Do you want a prescription reminder tonight?`
+
+Run with:
+1. `nod_yes`
+2. `shake_no`
+3. `confused`
+
+Expected:
+- Always 3 options with variety.
+- `nod_yes`: agree-like option appears first.
+- `shake_no`: decline-like option appears first.
+- `confused`: clarification-first tone.
+
+### C) Tone-only differential test
+Use the same query:
+- `Are we still on for the movie tonight?`
+
+Run with:
+1. `smile`
+2. `confused`
+
+Expected:
+- Both are memory grounded.
+- Wording/tone differs (smile warmer, confused more cautious/clarifying).
+
+---
+
+## 4) Memory Update + Recall Test
+
+Keep `Memory Update` ON.
+
+### Insert new partner memory
+1. `Tomorrow we have project rehearsal at 5:15 PM.`
+2. `Please remind me to carry my charger tomorrow morning.`
+3. `Tonight let's leave from the campus bus stop at 6:20.`
+
+Select/confirm any generated response each turn.
+
+Expected:
+- Final output box shows `Memory Ack: ...`
+- Ack mentions target bucket (`today_plans`, `next_days_plans`, `reminders`, etc.)
+
+### Verify retrieval of newly added memory
+1. `What did I add for tomorrow at 5:15?`
+2. `What reminder did I ask for tomorrow morning?`
+3. `What is our pre-movie leave plan tonight?`
+
+Expected:
+- Newly added items should be reflected in generated options.
+
+---
+
+## 5) Face/Camera Notes
+
+- Native `FaceDetector` API may be unavailable on some browsers.
+- The app uses MediaPipe when available and falls back gracefully.
+- If webcam behavior is unstable, use `Sim Face` presets for deterministic testing.
+
+---
+
+## 6) Running Automated Checks
+
+### Unit tests
+```bash
+python manage.py test home.aac.tests
+```
+
+### Evaluation script
+```bash
+python scripts/run_evaluation.py
+```
+
+Generated artifacts:
+- `outputs/metrics_summary.json`
+- `outputs/run_logs.jsonl`
+- `outputs/sample_transcripts.md`
+
+---
+
+## 7) Quick Troubleshooting
+
+- No responses shown:
+  - ensure server is running
+  - click `START` before sending partner message
+- Face not changing:
+  - use `Sim Face` mode first
+  - check `faceStatus` text under video
+- No memory acknowledgements:
+  - ensure `Memory Update` checkbox is ON before confirming
+- LLM not active:
+  - check `.env` key
+  - visit `/health/llm`

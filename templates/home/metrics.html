@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AAC Metrics</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 18px; background: #f7f9fc; color: #1e2a3a; }
+    .bar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .btn { display: inline-block; padding: 8px 12px; border-radius: 8px; text-decoration: none; border: 1px solid #c3cde0; background: #fff; color: #1e2a3a; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #dce3f2; padding: 6px; font-size: 0.9rem; text-align: left; vertical-align: top; }
+    th { background: #eef3ff; }
+    .mono { font-family: Consolas, monospace; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <a class="btn" href="/aac/">Back to AAC</a>
+    <a class="btn" href="/metrics/download/">Download JSONL Logs</a>
+  </div>
+  <h2>AAC Metrics History</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Event</th>
+        <th>Partner</th>
+        <th>Latency (ms)</th>
+        <th>Groundedness</th>
+        <th>Unsupported Claims</th>
+        <th>Sources</th>
+        <th>Camera / Face</th>
+        <th>Edit Distance</th>
+        <th>Acceptance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="mono">{{ row.timestamp }}</td>
+        <td>{{ row.event }}</td>
+        <td>{{ row.partner_detected }}</td>
+        <td>{{ row.latency_ms }}</td>
+        <td>{{ row.groundedness_score }}</td>
+        <td>{{ row.unsupported_claims_count }}</td>
+        <td>{{ row.sources_text }}</td>
+        <td>{{ row.camera_face_text }}</td>
+        <td>{{ row.edit_distance }}</td>
+        <td>{{ row.acceptance }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

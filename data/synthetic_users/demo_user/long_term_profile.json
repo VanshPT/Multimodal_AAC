@@ -1,0 +1,177 @@
+{
+  "user_id": "demo_user",
+  "display_name": "Akash",
+  "age_range": "early_20s",
+  "city_context": "college_town",
+  "living_situation": "shares apartment with roommate",
+  "primary_language": "English",
+  "secondary_language": "Spanish phrases with family",
+  "education_context": "CSE 635 coursework",
+  "communication_style": {
+    "preferred_length": "short",
+    "emoji_level": "low",
+    "tone": "warm_direct",
+    "pace_preference": "one_idea_at_a_time",
+    "repair_strategy": "clarify_then_confirm",
+    "preferred_openers": [
+      "I want to say",
+      "Quick note",
+      "Can we"
+    ],
+    "dispreferred_openers": [
+      "As an AI",
+      "Technically speaking"
+    ],
+    "preferred_confirmation_pattern": "repeat key plan + ask yes/no",
+    "preferred_clarification_pattern": "ask one focused follow-up",
+    "avoid_patterns": [
+      "overly formal",
+      "long explanations without pause"
+    ]
+  },
+  "personality_traits": [
+    "kind",
+    "dry humor",
+    "patient",
+    "values clarity",
+    "likes collaborative planning",
+    "likes predictable schedules",
+    "prefers practical conversations",
+    "enjoys small jokes with friends"
+  ],
+  "strengths": [
+    "planning ahead",
+    "task prioritization",
+    "active listening"
+  ],
+  "communication_needs": [
+    "needs extra time for multi-part questions",
+    "prefers one question at a time",
+    "benefits from confirmation before transitions",
+    "likes visual schedule reminders"
+  ],
+  "favorites": {
+    "foods": [
+      "veggie dumplings",
+      "mango smoothie",
+      "tomato soup"
+    ],
+    "activities": [
+      "movie night",
+      "co-op games",
+      "park walk"
+    ],
+    "music": [
+      "indie pop",
+      "lofi"
+    ],
+    "shows": [
+      "Only Murders in the Building",
+      "The Great British Bake Off"
+    ],
+    "snacks": [
+      "almonds",
+      "dark chocolate",
+      "fruit cups"
+    ],
+    "drinks": [
+      "sparkling water",
+      "mint tea"
+    ],
+    "study_spots": [
+      "quiet corner in library",
+      "window table at cafe"
+    ]
+  },
+  "relationships": {
+    "omer": "Close friend, chats in short playful style.",
+    "vansh": "Close friend, often discusses project deadlines.",
+    "siddharth": "Close friend, helps with planning and reminders.",
+    "aditya": "Close friend, casual upbeat conversation partner."
+  },
+  "people_and_relationships": [
+    {
+      "person_id": "omer",
+      "name": "Omer",
+      "relation": "friend",
+      "style_hint": "short playful check-ins"
+    },
+    {
+      "person_id": "vansh",
+      "name": "Vansh",
+      "relation": "friend",
+      "style_hint": "project-focused and concise"
+    },
+    {
+      "person_id": "siddharth",
+      "name": "Siddharth",
+      "relation": "friend",
+      "style_hint": "calm detailed planning"
+    },
+    {
+      "person_id": "aditya",
+      "name": "Aditya",
+      "relation": "friend",
+      "style_hint": "energetic casual tone"
+    }
+  ],
+  "important_places": [
+    "apartment building lobby",
+    "campus computer lab",
+    "downtown pharmacy",
+    "therapy clinic",
+    "neighborhood grocery store"
+  ],
+  "daily_routine_preferences": [
+    "morning check-in before first class",
+    "afternoon hydration reminder",
+    "evening medication reminder",
+    "next-day prep before bed"
+  ],
+  "conversation_boundaries": [
+    "avoid discussing financial details with strangers",
+    "avoid sharing medical specifics unless partner is trusted",
+    "avoid overpromising attendance before checking schedule"
+  ],
+  "assistive_setup": {
+    "device_name": "AAC tablet",
+    "input_method": "touch + phrase shortcuts",
+    "preferred_voice_rate": "moderate",
+    "preferred_voice_pitch": "slightly warm",
+    "quick_access_categories": [
+      "plans",
+      "clarify",
+      "thanks",
+      "health"
+    ]
+  },
+  "people_topics": [
+    "Omer and tonight's movie plan at Regal North screen 6",
+    "Vansh and CSE 635 progress",
+    "Siddharth and tomorrow schedule",
+    "Aditya and weekend cricket",
+    "Movie plans for tonight",
+    "Lab tasks for tomorrow"
+  ],
+  "partner_style_preferences": {
+    "friends": "casual and playful",
+    "general": "neutral and polite"
+  },
+  "response_buckets_preference": {
+    "decline_polite": "high",
+    "agree_casual": "high",
+    "clarify_calm": "high",
+    "plans": "high",
+    "routine": "medium",
+    "family": "medium",
+    "food": "medium"
+  },
+  "do_not_say": [
+    "I am fully independent and need no support.",
+    "I already took my medication when I did not.",
+    "Any statement that invents medical facts.",
+    "I do not need this AAC device anymore.",
+    "Please cancel my therapy forever."
+  ],
+  "ltm_update_policy": "requires_approval"
+}

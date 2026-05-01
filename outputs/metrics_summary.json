@@ -1,0 +1,20 @@
+{
+  "latency": {
+    "avg_time_to_options_ms": 4,
+    "avg_time_to_speak_suggestions_ms": 0,
+    "target_time_to_options_under_6000_ms": true
+  },
+  "groundedness": {
+    "avg_groundedness_score": 0.3149,
+    "hallucination_rate": 0.4
+  },
+  "user_effort": {
+    "avg_edit_distance": 0.043,
+    "acceptance_rate_without_edit": 0.6
+  },
+  "multimodal_alignment": {
+    "smile_example": "I want to share this for today: CSE 635 project check-in at 2:00 PM. \ud83d\ude42",
+    "confused_example": "I want to share this for today: CSE 635 project check-in at 2:00 PM.",
+    "tone_changed": true
+  }
+}
