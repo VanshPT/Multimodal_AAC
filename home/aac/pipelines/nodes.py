@@ -18,6 +18,15 @@ BUCKET_KEYWORDS = {
     "clarify_calm": {"mean", "clarify", "repeat", "explain"},
 }
 
+GREETING_TOKENS = {"hi", "hii", "hiii", "hello", "hey", "yo", "sup", "hiya"}
+GREETING_VOCATIVES = {"bro", "broo", "man", "dude", "buddy", "bhai"}
+PARTNER_TOPIC_KEYWORDS = {
+    "omer": {"movie", "regal", "bus", "stop", "cricket"},
+    "vansh": {"project", "check-in", "check", "slides", "cse", "lab", "deadline", "rehearsal"},
+    "siddharth": {"grocery", "timeline", "schedule", "charger", "reminder"},
+    "aditya": {"cricket", "weekend", "casual"},
+}
+
 
 def face_cue_node(camera_on: bool, provided_face_signals: FaceSignals) -> FaceSignals:
     if not camera_on:
@@ -29,10 +38,22 @@ def face_cue_node(camera_on: bool, provided_face_signals: FaceSignals) -> FaceSi
     negative = float(provided_face_signals.get("negative_prob", provided_face_signals.get("anger_prob", 0.0)))
     nod = float(provided_face_signals.get("nod_score", provided_face_signals.get("head_nod_score", 0.0)))
     shake = float(provided_face_signals.get("shake_score", provided_face_signals.get("head_shake_score", 0.0)))
+    hand_gesture = str(provided_face_signals.get("hand_gesture_label", "") or "").strip()
+    hand_gesture_score = float(provided_face_signals.get("hand_gesture_score", 0.0) or 0.0)
+    if hand_gesture_score >= 0.55:
+        if hand_gesture in {"Thumb_Up", "Victory", "ILoveYou"}:
+            nod = max(nod, min(1.0, 0.58 + 0.3 * hand_gesture_score))
+            smile = max(smile, min(1.0, 0.42 + 0.25 * hand_gesture_score))
+        elif hand_gesture in {"Thumb_Down", "Closed_Fist"}:
+            shake = max(shake, min(1.0, 0.58 + 0.3 * hand_gesture_score))
+            negative = max(negative, min(1.0, 0.4 + 0.35 * hand_gesture_score))
+        elif hand_gesture in {"Open_Palm", "Pointing_Up"}:
+            confused = max(confused, min(1.0, 0.34 + 0.28 * hand_gesture_score))
     neutral = float(provided_face_signals.get("neutral_prob", max(0.0, 1.0 - smile - confused)))
     strongest = max(smile, confused, neutral, negative, nod, shake)
     inferred_detected = strongest > 0.08 or (smile + confused + neutral) > 0.2
     face_detected = bool(provided_face_signals.get("face_detected", inferred_detected))
+    hand_detected = bool(provided_face_signals.get("hand_detected", bool(hand_gesture)))
     return {
         "face_detected": face_detected,
         "smile_score": max(0.0, min(1.0, smile)),
@@ -42,6 +63,10 @@ def face_cue_node(camera_on: bool, provided_face_signals: FaceSignals) -> FaceSi
         "negative_prob": max(0.0, min(1.0, negative)),
         "nod_score": max(0.0, min(1.0, nod)),
         "shake_score": max(0.0, min(1.0, shake)),
+        "hand_detected": hand_detected,
+        "hand_gesture_label": hand_gesture,
+        "hand_gesture_score": max(0.0, min(1.0, hand_gesture_score)),
+        "handedness": str(provided_face_signals.get("handedness", "") or "").strip(),
     }
 
 
@@ -72,10 +97,16 @@ def source_priority_planner_node(label: str) -> List[str]:
 
 
 def is_short_greeting(partner_text: str) -> bool:
+    tokens = tokenize(partner_text)
     cleaned = re.sub(r"[^a-zA-Z]", "", (partner_text or "").lower())
-    return cleaned in {"hi", "hii", "hiii", "hello", "hey", "yo", "sup"} or (
-        len(tokenize(partner_text)) <= 2 and any(token in {"hi", "hello", "hey", "yo", "sup"} for token in tokenize(partner_text))
-    )
+    if cleaned in GREETING_TOKENS:
+        return True
+    if not tokens:
+        return False
+    if tokens[0] in GREETING_TOKENS and len(tokens) <= 3:
+        tail = tokens[1:]
+        return not tail or all(token in GREETING_VOCATIVES for token in tail)
+    return len(tokens) <= 2 and any(token in GREETING_TOKENS for token in tokens)
 
 
 def bucket_selector_node(partner_text: str, label: str, active_partner_relation: str, face_signals: FaceSignals) -> List[str]:
@@ -129,6 +160,29 @@ def _ltm_chunks(state: SessionState):
             {
                 "bucket_id": _infer_bucket(f"{key} {text}"),
                 "text": f"{key}: {text}",
+                "source_type": "ltm_profile",
+            }
+        )
+    for person in state.ltm.get("people_and_relationships", []):
+        chunks.append(
+            {
+                "bucket_id": _infer_bucket(f"{person.get('name', '')} {person.get('style_hint', '')}"),
+                "text": f"partner profile: {person.get('name', '')} {person.get('style_hint', '')}",
+                "partner_id": str(person.get("person_id", "")).lower(),
+                "partner_name": person.get("name", ""),
+                "source_type": "ltm_partner_profile",
+            }
+        )
+    for topic in state.ltm.get("people_topics", []):
+        lower = topic.lower()
+        matched_person = next((person for person in state.ltm.get("people_and_relationships", []) if person.get("name", "").lower() in lower), None)
+        chunks.append(
+            {
+                "bucket_id": _infer_bucket(topic),
+                "text": f"people topic: {topic}",
+                "partner_id": str(matched_person.get("person_id", "")).lower() if matched_person else "",
+                "partner_name": matched_person.get("name", "") if matched_person else "",
+                "source_type": "ltm_people_topic",
             }
         )
     return chunks
@@ -143,18 +197,21 @@ def _stm_chunks(state: SessionState):
     topic_hints = state.stm.get("current_topic_hints", [])
     active_partner = state.stm.get("active_partner", {})
     for item in today_plans:
-        chunks.append({"bucket_id": "plans", "text": f"today plan: {item}"})
+        chunks.append({"bucket_id": "plans", "text": f"today plan: {item}", "source_type": "today_plan"})
     for item in next_days:
-        chunks.append({"bucket_id": "plans", "text": f"upcoming: {item}"})
+        chunks.append({"bucket_id": "plans", "text": f"upcoming: {item}", "source_type": "next_plan"})
     for item in reminders:
-        chunks.append({"bucket_id": "routine", "text": f"reminder: {item}"})
+        chunks.append({"bucket_id": "routine", "text": f"reminder: {item}", "source_type": "reminder"})
     for item in topic_hints:
-        chunks.append({"bucket_id": _infer_bucket(item), "text": f"topic hint: {item}"})
+        chunks.append({"bucket_id": _infer_bucket(item), "text": f"topic hint: {item}", "source_type": "topic_hint"})
     if active_partner:
         chunks.append(
             {
                 "bucket_id": "routine",
                 "text": f"active partner: {active_partner.get('name', 'Partner')} ({active_partner.get('type', 'friend_or_general')})",
+                "partner_id": str(active_partner.get("person_id", "")).lower(),
+                "partner_name": active_partner.get("name", ""),
+                "source_type": "active_partner",
             }
         )
     for turn in recent_turns[-5:]:
@@ -166,6 +223,7 @@ def _stm_chunks(state: SessionState):
                 "bucket_id": _infer_bucket(f"{partner} {response}"),
                 "text": f"recent turn partner:{partner} response:{response}",
                 "partner_name": partner_name,
+                "source_type": "recent_turn",
             }
         )
     return chunks
@@ -183,9 +241,29 @@ def _pb_chunks(state: SessionState):
                 "tone": phrase.get("tone", "neutral"),
                 "partner_id": phrase.get("partner_id", "unknown_partner"),
                 "partner_name": phrase.get("partner_name", ""),
+                "source_type": "phrase_bank",
             }
         )
     return chunks
+
+
+def _is_schedule_query(partner_text: str) -> bool:
+    text = (partner_text or "").lower()
+    return any(
+        phrase in text
+        for phrase in ["plan", "plans", "schedule", "today", "tomorrow", "later", "check-in", "rehearsal", "movie", "medication", "what do i have"]
+    )
+
+
+def _active_partner_topic_bonus(active_partner_id: str, text: str) -> float:
+    if not active_partner_id:
+        return 0.0
+    keywords = PARTNER_TOPIC_KEYWORDS.get(active_partner_id, set())
+    token_set = set(tokenize(text))
+    overlap = len(token_set.intersection(keywords))
+    if overlap == 0:
+        return 0.0
+    return min(0.3, 0.08 * overlap)
 
 
 def _evidence_refiner_node(pool: str, ranked_scored_chunks: List[Tuple[float, Dict]], min_score: float = 0.2):
@@ -224,6 +302,7 @@ def retrieve_from_pool_node(
     trace: List[RetrievalTraceStep] = []
     query_bucket = _infer_bucket(partner_text)
     greeting_query = is_short_greeting(partner_text)
+    schedule_query = _is_schedule_query(partner_text)
     active_partner = state.stm.get("active_partner", {})
     active_partner_name = str(active_partner.get("name", "")).lower()
     active_partner_id = str(active_partner.get("person_id", "unknown_partner")).lower()
@@ -248,6 +327,7 @@ def retrieve_from_pool_node(
                 partner_bonus += 0.18
             if active_partner_id and str(chunk.get("partner_id", "")).lower() == active_partner_id:
                 partner_bonus += 0.18
+            partner_bonus += _active_partner_topic_bonus(active_partner_id, text)
             phrase_weight = float(chunk.get("weight", 1.0))
             score = (0.55 * overlap + 0.35 * cosine + bucket_bonus + partner_bonus) * phrase_weight
             if greeting_query and pool == "STM" and chunk.get("bucket_id") in {"plans", "routine"}:
@@ -258,6 +338,20 @@ def retrieve_from_pool_node(
                     score += 0.25
                 if chunk_tokens.intersection({"movie", "therapy", "grocery", "medication", "class", "project"}):
                     score -= 0.2
+            if schedule_query:
+                source_type = chunk.get("source_type", "")
+                if source_type in {"today_plan", "next_plan", "reminder"}:
+                    score += 0.22
+                elif source_type == "topic_hint":
+                    score += 0.08
+                elif source_type == "recent_turn":
+                    score -= 0.28
+                if "check-in" in partner_text.lower() and "check-in" in text.lower():
+                    score += 0.22
+                if "rehearsal" in partner_text.lower() and "rehearsal" in text.lower():
+                    score += 0.22
+                if "movie" in partner_text.lower() and "movie" in text.lower():
+                    score += 0.22
             scored.append((score, chunk))
         top = pick_top(scored, key_fn=lambda item: item[0], k=top_k)
         before_refine, refined = _evidence_refiner_node(pool=pool, ranked_scored_chunks=top, min_score=0.2)
@@ -305,6 +399,15 @@ def groundedness_guard_node(evidence: List[RetrievalEvidence]) -> Dict[str, str]
 def _tone_prefix(face_signals: FaceSignals) -> str:
     if not face_signals:
         return ""
+    hand_gesture = face_signals.get("hand_gesture_label", "")
+    hand_score = float(face_signals.get("hand_gesture_score", 0.0) or 0.0)
+    if hand_score > 0.55:
+        if hand_gesture in {"Thumb_Down", "Closed_Fist"}:
+            return "I do not think so"
+        if hand_gesture in {"Thumb_Up", "Victory", "ILoveYou"}:
+            return "Yes, that seems right"
+        if hand_gesture in {"Open_Palm", "Pointing_Up"}:
+            return "Could you clarify a little"
     if face_signals.get("shake_score", 0.0) > 0.55:
         return "I do not think so"
     if face_signals.get("nod_score", 0.0) > 0.55:
@@ -322,10 +425,116 @@ def _is_binary_prompt(partner_text: str) -> bool:
     text = (partner_text or "").strip().lower()
     if not text:
         return False
-    starts = ("are ", "is ", "do ", "did ", "can ", "could ", "would ", "will ", "should ", "want ")
-    binary_words = {"yes", "no", "okay", "available", "free", "ready", "want", "go", "come", "confirm"}
+    starts = ("are ", "is ", "do ", "did ", "can ", "could ", "would ", "will ", "should ", "want ", "you ", "u ")
+    binary_words = {"yes", "no", "okay", "available", "free", "ready", "want", "go", "come", "confirm", "remember", "know", "recall"}
     token_set = set(tokenize(text))
-    return text.endswith("?") and (text.startswith(starts) or bool(token_set.intersection(binary_words)))
+    recall_query = bool(token_set.intersection({"remember", "know", "recall"}))
+    return text.endswith("?") and (text.startswith(starts) or bool(token_set.intersection(binary_words)) or recall_query)
+
+
+def _is_plan_change_prompt(partner_text: str) -> bool:
+    text = (partner_text or "").strip().lower()
+    if not text:
+        return False
+    has_schedule_marker = any(
+        phrase in text
+        for phrase in ["movie", "plan", "plans", "7 pm", "7:00", "at ", "time", "schedule"]
+    )
+    has_explicit_change_marker = any(
+        phrase in text
+        for phrase in ["tomorrow", "instead", "some other time", "sometime else", "another time", "reschedule", "move it", "change it", "let us go tomorrow", "lets go tomorrow"]
+    )
+    return has_schedule_marker and has_explicit_change_marker
+
+
+def _is_schedule_summary_query(partner_text: str) -> bool:
+    text = (partner_text or "").strip().lower()
+    if not text:
+        return False
+    return any(
+        phrase in text
+        for phrase in [
+            "what do i have later today",
+            "what do i have today",
+            "what do i have left today",
+            "what's left today",
+            "whats left today",
+            "later today",
+            "today schedule",
+            "my plans today",
+        ]
+    )
+
+
+def _extract_memory_time_token(evidence_lines: List[str]) -> str:
+    for line in evidence_lines:
+        match = re.search(r"\b\d{1,2}(:\d{2})?\s*(am|pm)\b", line, flags=re.IGNORECASE)
+        if match:
+            return match.group(0).upper()
+    return ""
+
+
+def _compact_time_token(time_token: str) -> str:
+    token = (time_token or "").strip().upper()
+    if not token:
+        return ""
+    match = re.match(r"(\d{1,2})(?::(\d{2}))?\s*(AM|PM)", token)
+    if not match:
+        return token
+    hour = int(match.group(1))
+    minute = match.group(2) or "00"
+    ampm = match.group(3)
+    if minute == "00":
+        return f"{hour} {ampm}"
+    return f"{hour}:{minute} {ampm}"
+
+
+def _generate_plan_change_options(evidence: List[RetrievalEvidence]) -> List[str]:
+    evidence_lines = [ev.text for ev in evidence[:3]]
+    time_token = _compact_time_token(_extract_memory_time_token(evidence_lines))
+    keep_time = f"No, let us go at {time_token}." if time_token else "No, let us keep the original time."
+    return [
+        keep_time,
+        "No, let us go sometime else.",
+        "Yes, it is fine with me.",
+    ]
+
+
+def _schedule_sort_key(item: str) -> Tuple[int, str]:
+    match = re.search(r"\b(\d{1,2})(?::(\d{2}))?\s*(AM|PM)\b", item, flags=re.IGNORECASE)
+    if not match:
+        return (9999, item.lower())
+    hour = int(match.group(1))
+    minute = int(match.group(2) or 0)
+    ampm = match.group(3).upper()
+    if ampm == "PM" and hour != 12:
+        hour += 12
+    if ampm == "AM" and hour == 12:
+        hour = 0
+    return (hour * 60 + minute, item.lower())
+
+
+def _compress_plan_item(plan: str) -> str:
+    text = re.sub(r"^today plan:\s*", "", (plan or "").strip(), flags=re.IGNORECASE)
+    text = re.sub(r"\bMovie with Omer at (\d{1,2}:\d{2}\s*[AP]M) at Regal North screen 6\b", r"movie with Omer at \1", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bCSE 635 project check-in\b", "CSE 635 check-in", text, flags=re.IGNORECASE)
+    return text
+
+
+def _generate_schedule_summary_options(state: SessionState, face_signals: FaceSignals) -> List[str]:
+    plans = sorted([_compress_plan_item(item) for item in state.stm.get("today_plans", [])], key=_schedule_sort_key)
+    if not plans:
+        return [
+            "You do not have a stored plan for later today yet.",
+            "I do not see any later-today plans in memory right now.",
+            "Do you want me to check tomorrow instead?",
+        ]
+    full_plan = "You have " + ", ".join(plans[:-1]) + f", and {plans[-1]}." if len(plans) > 1 else f"You have {plans[0]}."
+    concise_plan = "Later today: " + "; ".join(plans[:3]) + ("." if len(plans) <= 3 else f"; and {len(plans) - 3} more.")
+    next_step = f"The next few things are {plans[0]}" if len(plans) == 1 else f"The next few things are {plans[0]}, then {plans[1]}."
+    if (face_signals or {}).get("confused_prob", 0.0) > 0.45:
+        return [full_plan, concise_plan, "Do you want the full list again or just the next thing?"]
+    return [full_plan, concise_plan, next_step]
 
 
 def _binary_memory_stance(evidence: List[RetrievalEvidence], partner_text: str) -> str:
@@ -355,9 +564,8 @@ def candidate_generator_node(
     partner_style_hint: str,
 ) -> List[str]:
     if is_short_greeting(partner_text):
-        prefix = _tone_prefix(face_signals)
-        if prefix:
-            return [f"{prefix}! Hi.", "Hey! Good to see you.", "Hi!"]
+        if (face_signals or {}).get("smile_prob", 0.0) > 0.55:
+            return ["Hey! Good to see you.", "Hi! How are you?", "Hi!"]
         return ["Hi, good to see you.", "Hey! How are you?", "Hi!"]
     style = state.ltm.get("communication_style", {})
     brevity = style.get("preferred_length", "short")
@@ -372,6 +580,12 @@ def candidate_generator_node(
         ]
         return base
 
+    if _is_schedule_summary_query(partner_text):
+        return _generate_schedule_summary_options(state=state, face_signals=face_signals)
+
+    if _is_plan_change_prompt(partner_text):
+        return _generate_plan_change_options(evidence)
+
     if _is_binary_prompt(partner_text):
         return _generate_binary_options(partner_text=partner_text, evidence=evidence, face_signals=face_signals)
 
@@ -379,6 +593,15 @@ def candidate_generator_node(
     anchor = _clean_fact_fragment(evidence_lines[0].split(":", 1)[-1].strip()) if evidence_lines else ""
     second_anchor = _clean_fact_fragment(evidence_lines[1].split(":", 1)[-1].strip()) if len(evidence_lines) > 1 else anchor
     memory_detail = _extract_memory_detail(evidence_lines)
+    face_detected = bool((face_signals or {}).get("face_detected", False))
+    if not face_detected:
+        base_detail = memory_detail or anchor or second_anchor or "that plan"
+        fallback_anchor = second_anchor or anchor or base_detail
+        return [
+            f"From what I remember, {base_detail}. That sounds good to me.",
+            f"{fallback_anchor}. I can go with that plan.",
+            f"I remember {base_detail}. Do you want to confirm one detail first?",
+        ]
     memory_lead = "From what I remember, " if label in {"Contextual", "Personal"} and memory_detail else ""
     emoji = " 🙂" if emoji_light == "low" and (face_signals or {}).get("smile_prob", 0) > 0.7 else ""
     exemplar_fragment = pb_exemplars[0] if pb_exemplars else "I want to keep it simple."
@@ -395,9 +618,29 @@ def candidate_generator_node(
     style_prefix = ""
     if tone_boost:
         style_prefix = f"{tone_boost}, "
-    option_1 = f"{style_prefix}{memory_lead}{memory_detail or anchor}. That works for me."
-    option_2 = f"{second_anchor}. I remember this detail, so yes{emoji}."
-    option_3 = f"{memory_detail or anchor}. Works for me."
+    tone_mode = _tone_mode(face_signals)
+    if tone_mode == "decline":
+        reason_detail = memory_detail or anchor or second_anchor or "that"
+        short_no = "No." if not reason_detail else f"No, I do not want to right now."
+        option_1 = short_no
+        option_2 = f"{style_prefix}{memory_lead}{reason_detail}. I cannot do that right now."
+        option_3 = f"No, let us go some other time. {second_anchor or reason_detail}."
+    elif tone_mode == "clarify":
+        option_1 = f"{style_prefix}{memory_lead}{memory_detail or anchor}. Can you confirm one detail for me?"
+        option_2 = f"{second_anchor}. I want to answer carefully."
+        option_3 = f"{memory_detail or anchor}. Could you repeat the key part?"
+    elif tone_mode == "agree":
+        option_1 = f"{style_prefix}{memory_lead}{memory_detail or anchor}. That works for me."
+        option_2 = f"{second_anchor}. Yes, I remember this detail{emoji}."
+        option_3 = f"{memory_detail or anchor}. I am good with that plan."
+    elif tone_mode == "warm":
+        option_1 = f"{style_prefix}{memory_lead}{memory_detail or anchor}. That sounds nice."
+        option_2 = f"{second_anchor}. Yes, I remember this detail{emoji}."
+        option_3 = f"{memory_detail or anchor}. I am happy with that."
+    else:
+        option_1 = f"{style_prefix}{memory_lead}{memory_detail or anchor}. That works for me."
+        option_2 = f"{second_anchor}. I remember this detail, so yes{emoji}."
+        option_3 = f"{memory_detail or anchor}. Works for me."
 
     if brevity == "short":
         option_1 = option_1[:150]
@@ -411,19 +654,37 @@ def _generate_binary_options(partner_text: str, evidence: List[RetrievalEvidence
     memory_detail = _extract_memory_detail([ev.text for ev in evidence[:3]])
     stance = _binary_memory_stance(evidence=evidence, partner_text=partner_text)
     agree = f"Yes, that works for me{'.' if not memory_detail else f'. I remember {memory_detail}.'}"
-    decline_polite = "I would rather not right now, but thanks for asking."
-    decline_firm = "No, I do not want that right now."
+    decline_polite = "No, I do not want to right now."
+    decline_firm = "No."
+    decline_reschedule = f"No, let us do it some other time{'.' if not memory_detail else f'. I remember {memory_detail}.'}"
+    no_memory = "No, I do not remember right now."
+    memory_based = (
+        f"I think {memory_detail}, but I am not fully sure."
+        if memory_detail
+        else "I think there was a plan, but I am not fully sure."
+    )
     clarify = "I am not sure yet. Can you give me one more detail?"
     if stance == "agree":
         agree = f"Yes, I am okay with it. I remember {memory_detail or 'that plan'}."
     if stance == "decline":
         decline_polite = "No thanks, I will pass for now."
+        decline_reschedule = "No, not now. Maybe some other time."
     nod = (face_signals or {}).get("nod_score", 0.0)
     shake = (face_signals or {}).get("shake_score", 0.0)
     negative = (face_signals or {}).get("negative_prob", 0.0)
     confused = (face_signals or {}).get("confused_prob", 0.0)
+    hand_gesture = (face_signals or {}).get("hand_gesture_label", "")
+    hand_score = float((face_signals or {}).get("hand_gesture_score", 0.0) or 0.0)
+    if hand_score > 0.55:
+        if hand_gesture in {"Thumb_Down", "Closed_Fist"}:
+            shake = max(shake, 0.8)
+            negative = max(negative, 0.65)
+        elif hand_gesture in {"Thumb_Up", "Victory", "ILoveYou"}:
+            nod = max(nod, 0.8)
+        elif hand_gesture in {"Open_Palm", "Pointing_Up"}:
+            confused = max(confused, 0.6)
     if shake > 0.55 or negative > 0.5:
-        return [decline_firm, decline_polite, clarify]
+        return [decline_firm, no_memory, memory_based]
     if nod > 0.55:
         return [agree, decline_polite, clarify]
     if confused > 0.45:
@@ -459,6 +720,8 @@ def postprocess_candidate_text(text: str) -> str:
     ]
     for fragment in banned_fragments:
         cleaned = re.sub(re.escape(fragment), "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\brecent turn partner:\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\bPartner asked\b", "You asked", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\bI want to say\s*[.:,-]*\s*", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\bQuick note\s*[,:-]*\s*", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"^[\s\.,;:!\?-]+", "", cleaned)
@@ -505,7 +768,9 @@ def enforce_memory_signature(options: List[str], evidence: List[RetrievalEvidenc
     revised = []
     for idx, option in enumerate(options):
         lowered = option.lower()
-        if idx < 2 and detail.lower() not in lowered:
+        if lowered.startswith(("no", "can you", "could you", "i am not sure")):
+            revised.append(option)
+        elif idx < 2 and detail.lower() not in lowered:
             revised.append(f"I remember {detail}, {option}")
         else:
             revised.append(option)
@@ -515,6 +780,9 @@ def enforce_memory_signature(options: List[str], evidence: List[RetrievalEvidenc
 def _clean_fact_fragment(text: str) -> str:
     raw = text.strip()
     lower = raw.lower()
+    if "recent turn partner:" in lower and "response:" in lower:
+        raw = raw[lower.index("response:") + len("response:") :].strip()
+        lower = raw.lower()
     if "response:" in lower:
         raw = raw[lower.index("response:") + len("response:") :].strip()
     elif "partner:" in lower:
@@ -670,24 +938,62 @@ def speak_planner_node(state: SessionState, face_signals: FaceSignals) -> Dict[s
 
 def face_summary(face_signals: FaceSignals) -> str:
     if not face_signals or not face_signals.get("face_detected", False):
+        if face_signals and face_signals.get("hand_detected") and face_signals.get("hand_gesture_label"):
+            return f"hand gesture: {face_signals.get('hand_gesture_label')}"
         return "Face not detected"
+    parts = []
     if face_signals.get("shake_score", 0.0) > 0.55:
-        return "head shake high"
-    if face_signals.get("nod_score", 0.0) > 0.55:
-        return "head nod high"
-    if face_signals.get("negative_prob", 0.0) > 0.5:
-        return "negative affect high"
-    if face_signals.get("smile_score", face_signals.get("smile_prob", 0.0)) > 0.55:
-        return "smile high"
-    if face_signals.get("confused_prob", 0.0) > 0.45:
-        return "confused high"
-    return "neutral/low signal"
+        parts.append("head shake high")
+    elif face_signals.get("nod_score", 0.0) > 0.55:
+        parts.append("head nod high")
+    elif face_signals.get("negative_prob", 0.0) > 0.5:
+        parts.append("negative affect high")
+    elif face_signals.get("smile_score", face_signals.get("smile_prob", 0.0)) > 0.55:
+        parts.append("smile high")
+    elif face_signals.get("confused_prob", 0.0) > 0.45:
+        parts.append("confused high")
+    else:
+        parts.append("neutral/low signal")
+    if face_signals.get("hand_detected") and face_signals.get("hand_gesture_label"):
+        parts.append(f"hand {face_signals.get('hand_gesture_label')}")
+    return " + ".join(parts)
 
 
 def coarse_face_tag(face_signals: FaceSignals) -> str:
     if not face_signals or not face_signals.get("face_detected", False):
+        if face_signals and face_signals.get("hand_gesture_label") in {"Thumb_Up", "Victory", "ILoveYou"}:
+            return "agree_gesture"
+        if face_signals and face_signals.get("hand_gesture_label") in {"Thumb_Down", "Closed_Fist"}:
+            return "decline_gesture"
         return "none"
     return "smile" if face_signals.get("smile_score", face_signals.get("smile_prob", 0.0)) > 0.55 else "not_smile"
+
+
+def _tone_mode(face_signals: FaceSignals) -> str:
+    if not face_signals:
+        return "neutral"
+    hand_gesture = face_signals.get("hand_gesture_label", "")
+    hand_score = float(face_signals.get("hand_gesture_score", 0.0) or 0.0)
+    if hand_score > 0.55:
+        if hand_gesture in {"Thumb_Down", "Closed_Fist"}:
+            return "decline"
+        if hand_gesture in {"Thumb_Up", "Victory", "ILoveYou"}:
+            return "agree"
+        if hand_gesture in {"Open_Palm", "Pointing_Up"}:
+            return "clarify"
+    if face_signals.get("shake_score", 0.0) > 0.55 or face_signals.get("negative_prob", 0.0) > 0.5:
+        return "decline"
+    if face_signals.get("nod_score", 0.0) > 0.55:
+        return "agree"
+    if face_signals.get("confused_prob", 0.0) > 0.45:
+        return "clarify"
+    if face_signals.get("smile_prob", 0.0) > 0.55:
+        return "warm"
+    return "neutral"
+
+
+def has_strong_tone_signal(face_signals: FaceSignals) -> bool:
+    return _tone_mode(face_signals) in {"agree", "decline", "clarify"}
 
 
 def utc_now_iso() -> str:

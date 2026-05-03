@@ -4,12 +4,12 @@ from dataclasses import asdict
 from difflib import SequenceMatcher
 import re
 from uuid import uuid4
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from home.aac.evaluation.metrics import edit_distance_ratio, groundedness_score
 from home.aac.logging_utils import log_event
 from home.aac.memory.store import memory_store
-from home.aac.pipelines.nodes import coarse_face_tag, router_node, utc_now_iso
+from home.aac.pipelines.nodes import coarse_face_tag, is_short_greeting, router_node, utc_now_iso
 from home.aac.pipelines.normal_pipeline import run_normal_pipeline
 from home.aac.pipelines.speak_pipeline import run_speak_pipeline
 from home.aac.types import SessionState
@@ -296,8 +296,10 @@ def _extract_partner_memory_candidate(partner_text: str) -> str:
     raw = (partner_text or "").strip()
     if not raw:
         return ""
+    if "?" in raw:
+        return ""
     raw = re.sub(r"\?+$", "", raw).strip()
-    if re.match(r"^(are|is|do|did|can|could|would|will|should)\s+", raw.lower()):
+    if re.match(r"^(are|is|do|did|can|could|would|will|should|what|when|where|why|how|who)\s+", raw.lower()):
         return ""
     if len(raw.split()) < 4:
         return ""
@@ -311,6 +313,200 @@ def _append_unique_memory_item(items: list, candidate: str) -> bool:
             return False
     items.append(candidate)
     return True
+
+
+def _extract_time_token(text: str) -> str:
+    match = re.search(r"\b\d{1,2}(:\d{2})?\s*(am|pm)\b", text or "", flags=re.IGNORECASE)
+    return match.group(0).upper() if match else ""
+
+
+def _normalize_spacing(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "")).strip(" .")
+
+
+def _looks_affirmative(text: str) -> bool:
+    lower = (text or "").strip().lower()
+    if not lower:
+        return False
+    if lower.startswith(("no", "not", "don't", "dont", "cannot", "can't", "pass")):
+        return False
+    return any(
+        phrase in lower
+        for phrase in ["yes", "fine with me", "works for me", "sounds good", "okay with", "i am okay", "i'm okay", "lets go tomorrow", "let us go tomorrow"]
+    )
+
+
+def _looks_negative(text: str) -> bool:
+    lower = (text or "").strip().lower()
+    return lower.startswith(("no", "not")) or any(
+        phrase in lower for phrase in ["do not want", "don't want", "dont want", "cannot do", "can't do", "pass for now"]
+    )
+
+
+def _contains_reschedule_signal(*texts: str) -> bool:
+    merged = " ".join((text or "").lower() for text in texts)
+    return any(
+        phrase in merged
+        for phrase in ["tomorrow", "some other time", "sometime else", "another time", "later", "reschedule", "move it", "change it"]
+    )
+
+
+def _extract_schedule_day(*texts: str) -> str:
+    merged = " ".join((text or "").lower() for text in texts)
+    if "tomorrow" in merged:
+        return "tomorrow"
+    for day in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]:
+        if day in merged:
+            return day
+    if "tonight" in merged:
+        return "tonight"
+    if "today" in merged:
+        return "today"
+    return ""
+
+
+def _topic_tokens(text: str) -> set:
+    return {
+        token
+        for token in re.findall(r"[a-zA-Z']+", (text or "").lower())
+        if token not in {"the", "a", "an", "at", "to", "for", "and", "we", "had", "have", "our", "with", "this", "that", "it", "go", "lets", "let", "tomorrow", "today"}
+    }
+
+
+def _is_question_like_text(text: str) -> bool:
+    raw = (text or "").strip().lower()
+    if not raw:
+        return False
+    if "?" in raw:
+        return True
+    return bool(re.match(r"^(are|is|do|did|can|could|would|will|should|what|whatt|when|where|why|how|who|u|you)\b", raw))
+
+
+def _find_matching_plan(state: SessionState, partner_text: str, final_text: str) -> str:
+    plans: List[str] = list(state.stm.get("today_plans", []))
+    if not plans:
+        return ""
+    non_question_plans = [plan for plan in plans if not _is_question_like_text(plan)]
+    candidates = non_question_plans or plans
+    query_tokens = _topic_tokens(f"{partner_text} {final_text}")
+    best_plan = ""
+    best_score = -1
+    for plan in candidates:
+        plan_tokens = _topic_tokens(plan)
+        score = len(query_tokens.intersection(plan_tokens))
+        if _extract_time_token(plan):
+            score += 2
+        if "movie" in query_tokens and "movie" in plan_tokens:
+            score += 2
+        if "therapy" in query_tokens and "therapy" in plan_tokens:
+            score += 2
+        if score > best_score:
+            best_plan = plan
+            best_score = score
+    if best_score <= 0:
+        return ""
+    if "movie" in query_tokens and "movie" not in _topic_tokens(best_plan):
+        return ""
+    if "therapy" in query_tokens and "therapy" not in _topic_tokens(best_plan):
+        return ""
+    return best_plan
+
+
+def _replace_time_token(plan_text: str, new_time: str) -> str:
+    if not new_time:
+        return plan_text
+    if re.search(r"\b\d{1,2}(:\d{2})?\s*(am|pm)\b", plan_text, flags=re.IGNORECASE):
+        return re.sub(r"\b\d{1,2}(:\d{2})?\s*(am|pm)\b", new_time, plan_text, count=1, flags=re.IGNORECASE)
+    return f"{plan_text} at {new_time}"
+
+
+def _build_rescheduled_plan(plan_text: str, partner_text: str, final_text: str) -> str:
+    base = _normalize_spacing(plan_text or partner_text or final_text)
+    new_time = _extract_time_token(final_text) or _extract_time_token(partner_text)
+    if new_time:
+        base = _replace_time_token(base, new_time)
+    target_day = _extract_schedule_day(final_text, partner_text)
+    if target_day == "tomorrow":
+        if not base.lower().startswith("tomorrow:"):
+            base = f"Tomorrow: {base}"
+    elif target_day and target_day not in {"today", "tonight"}:
+        if not base.lower().startswith(f"{target_day}:"):
+            base = f"{target_day.title()}: {base}"
+    return _normalize_spacing(base)
+
+
+def _remove_plan_item(items: List[str], candidate: str) -> bool:
+    lowered = _normalize_spacing(candidate).lower()
+    for index, existing in enumerate(list(items)):
+        if _normalize_spacing(str(existing)).lower() == lowered:
+            del items[index]
+            return True
+    return False
+
+
+def _update_structured_schedule_memory(state: SessionState, partner_text: str, final_text: str) -> Dict[str, Any]:
+    merged_text = f"{partner_text} {final_text}".strip().lower()
+    if not any(token in merged_text for token in ["movie", "plan", "plans", "therapy", "meeting", "check-in", "class", "7", "pm", "am", "tomorrow", "today", "tonight"]):
+        return {"action": "skipped", "bucket": "", "value": ""}
+
+    matched_plan = _find_matching_plan(state, partner_text=partner_text, final_text=final_text)
+    partner_day = _extract_schedule_day(partner_text)
+    final_day = _extract_schedule_day(final_text)
+    affirmative = _looks_affirmative(final_text)
+    negative = _looks_negative(final_text)
+    reschedule = _contains_reschedule_signal(partner_text, final_text)
+    wants_keep_time = negative and bool(re.search(r"\b(at|around)\s+\d{1,2}(:\d{2})?\s*(am|pm)\b", final_text, flags=re.IGNORECASE))
+
+    if matched_plan and wants_keep_time:
+        updated_value = _replace_time_token(matched_plan, _extract_time_token(final_text) or _extract_time_token(matched_plan))
+        today_items = state.stm.setdefault("today_plans", [])
+        _remove_plan_item(today_items, matched_plan)
+        _append_unique_memory_item(today_items, updated_value)
+        state.stm["memory_update_last_note"] = f"Kept today's plan active: {updated_value}"
+        return {"action": "kept_today_plan", "bucket": "today_plans", "value": updated_value}
+
+    should_move_to_future = bool(
+        matched_plan
+        and reschedule
+        and (final_day == "tomorrow" or (partner_day == "tomorrow" and affirmative) or ("tomorrow" in partner_text.lower() and "maybe tomorrow" in final_text.lower()))
+    )
+    if should_move_to_future:
+        rescheduled_value = _build_rescheduled_plan(matched_plan, partner_text=partner_text, final_text=final_text)
+        today_items = state.stm.setdefault("today_plans", [])
+        next_items = state.stm.setdefault("next_days_plans", [])
+        removed = _remove_plan_item(today_items, matched_plan)
+        inserted = _append_unique_memory_item(next_items, rescheduled_value)
+        state.stm["memory_update_last_note"] = (
+            f"Updated the plan to next_days_plans: {rescheduled_value}"
+            if inserted or removed
+            else f"I already had this updated plan in next_days_plans: {rescheduled_value}"
+        )
+        return {"action": "rescheduled_to_future", "bucket": "next_days_plans", "value": rescheduled_value}
+
+    if affirmative and partner_day == "tomorrow" and matched_plan:
+        rescheduled_value = _build_rescheduled_plan(matched_plan, partner_text=partner_text, final_text=partner_text)
+        today_items = state.stm.setdefault("today_plans", [])
+        next_items = state.stm.setdefault("next_days_plans", [])
+        removed = _remove_plan_item(today_items, matched_plan)
+        inserted = _append_unique_memory_item(next_items, rescheduled_value)
+        state.stm["memory_update_last_note"] = (
+            f"Saved the agreed updated plan: {rescheduled_value}"
+            if inserted or removed
+            else f"I already had this agreed updated plan: {rescheduled_value}"
+        )
+        return {"action": "agreed_future_plan", "bucket": "next_days_plans", "value": rescheduled_value}
+
+    if affirmative and matched_plan:
+        maybe_new_time = _extract_time_token(final_text) or _extract_time_token(partner_text)
+        if maybe_new_time:
+            updated_value = _replace_time_token(matched_plan, maybe_new_time)
+            today_items = state.stm.setdefault("today_plans", [])
+            _remove_plan_item(today_items, matched_plan)
+            _append_unique_memory_item(today_items, updated_value)
+            state.stm["memory_update_last_note"] = f"Updated today's plan timing: {updated_value}"
+            return {"action": "updated_today_time", "bucket": "today_plans", "value": updated_value}
+
+    return {"action": "skipped", "bucket": "", "value": ""}
 
 
 def _update_stm_partner_memory(state: SessionState, partner_text: str) -> Dict[str, Any]:
@@ -364,18 +560,24 @@ def confirm_response(
     partner_memory_action = {"action": "skipped", "bucket": "", "value": ""}
     ltm_action = "requires_approval"
     if memory_update_on:
-        pb_action = _update_pb(state, selected_text=selected_text, final_text=final_text)
-        _update_stm(
-            state=state,
-            partner_text=partner_text or "",
-            final_text=final_text,
-            router_label=router_label,
-            face_signals=face_signals,
-            active_partner_relation=state.stm.get("active_partner", {}).get("relation", "general"),
-        )
-        partner_memory_action = _update_stm_partner_memory(state=state, partner_text=partner_text)
-        stm_action = "updated"
-        memory_store.persist_session_memories(state)
+        if is_short_greeting(partner_text or ""):
+            state.stm["memory_update_last_note"] = "No memory update needed for a simple greeting."
+            stm_action = "skipped_trivial_greeting"
+        else:
+            pb_action = _update_pb(state, selected_text=selected_text, final_text=final_text)
+            _update_stm(
+                state=state,
+                partner_text=partner_text or "",
+                final_text=final_text,
+                router_label=router_label,
+                face_signals=face_signals,
+                active_partner_relation=state.stm.get("active_partner", {}).get("relation", "general"),
+            )
+            partner_memory_action = _update_structured_schedule_memory(state=state, partner_text=partner_text, final_text=final_text)
+            if partner_memory_action.get("action") == "skipped":
+                partner_memory_action = _update_stm_partner_memory(state=state, partner_text=partner_text)
+            stm_action = "updated"
+            memory_store.persist_session_memories(state)
     generation_context = state.stm.get("last_generation_context", {})
     metrics_update = _update_query_metrics_after_confirm(
         state=state,

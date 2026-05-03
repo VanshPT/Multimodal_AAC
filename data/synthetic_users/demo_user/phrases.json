@@ -1586,9 +1586,9 @@
       "length": "short",
       "partner_type": "friend_or_general",
       "bucket_id": "clarify_calm",
-      "weight": 1.7,
+      "weight": 4.1,
       "source": "session_confirmation",
-      "last_used": "2026-04-30T23:52:51.087751+00:00"
+      "last_used": "2026-05-03T06:12:22.441675+00:00"
     },
     {
       "text": "Got it, I noted that.",
@@ -1712,6 +1712,17 @@
       "last_used": "2026-04-30T23:47:08.629814+00:00"
     },
     {
+      "text": "I remember that is planned for 7:00 PM, 7:00 still works for the movie. Does 7:00 still work for you.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T01:53:40.981787+00:00"
+    },
+    {
       "text": "Got it, I noted that.",
       "intent": "custom",
       "tone": "neutral",
@@ -1720,10 +1731,10 @@
       "bucket_id": "clarify_calm",
       "weight": 1.1,
       "source": "session_confirmation",
-      "last_used": "2026-04-30T23:52:51.112241+00:00"
+      "last_used": "2026-05-03T03:58:57.465164+00:00"
     },
     {
-      "text": "Fallback confirm text",
+      "text": "Got it, I noted that.",
       "intent": "custom",
       "tone": "neutral",
       "length": "short",
@@ -1731,10 +1742,10 @@
       "bucket_id": "clarify_calm",
       "weight": 1.1,
       "source": "session_confirmation",
-      "last_used": "2026-04-30T23:53:07.721961+00:00"
+      "last_used": "2026-05-03T04:21:59.046239+00:00"
     },
     {
-      "text": "I remember Partner asked: Do you want a prescription reminder tonight?, no thank you, I have it covered. Is that okay.",
+      "text": "I remember Hey! How are you?, hi.",
       "intent": "custom",
       "tone": "neutral",
       "length": "short",
@@ -1742,7 +1753,458 @@
       "bucket_id": "clarify_calm",
       "weight": 1.1,
       "source": "session_confirmation",
-      "last_used": "2026-04-30T23:54:02.170117+00:00"
+      "last_used": "2026-05-03T04:24:19.858213+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T04:35:08.507013+00:00"
+    },
+    {
+      "text": "Hi.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T04:36:50.130546+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T04:41:26.243889+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T04:41:50.082477+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T04:47:44.265964+00:00"
+    },
+    {
+      "text": "I remember Hey! How are you doing?, good to see you.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T04:57:20.987269+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:00:44.278885+00:00"
+    },
+    {
+      "text": "No, I do not remember right now.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.25,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:59:39.829354+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe Tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:04:06.918373+00:00"
+    },
+    {
+      "text": "Yes, it is fine with me.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 2.6,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:12:22.373255+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:23:19.084627+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:23:19.138918+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:23:51.522943+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:24:26.910720+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:24:26.968780+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:33:32.300609+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:33:32.362786+00:00"
+    },
+    {
+      "text": "Hi, good to see you.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:34:37.673188+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:36:18.031974+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:36:18.089080+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:36:40.709945+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:36:40.768689+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:43:45.480276+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:43:45.546850+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:49:37.210003+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:49:37.276819+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:50:00.140579+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:50:00.210062+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:50:56.981989+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:50:57.059116+00:00"
+    },
+    {
+      "text": "I remember therapy is at 4:30 PM, Later today: CSE 635 check-in at 2:00 PM; Therapy exercises at 4:30 PM; movie with Omer at 7:00 PM; and 2 more.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:53:50.947293+00:00"
+    },
+    {
+      "text": "Can we have popcorn?",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:54:49.074913+00:00"
+    },
+    {
+      "text": "I remember Acknowledge the question with appreciation, . I haven't yet.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:57:27.089229+00:00"
+    },
+    {
+      "text": "Yes, that works for me. I remember the movie is at 7:00 PM.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T05:58:27.888426+00:00"
+    },
+    {
+      "text": "No, let us go sometime else.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:01:33.297269+00:00"
+    },
+    {
+      "text": "I remember the movie is at 7:00 PM, Tomorrow works well, okay. It works for me",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:02:47.338397+00:00"
+    },
+    {
+      "text": "Its tomorrow",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:03:50.761264+00:00"
+    },
+    {
+      "text": "Movie is tomorrow. Okay?",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:04:24.402588+00:00"
+    },
+    {
+      "text": "I remember that is planned for 5:15 PM, we have rehearsal at 5:15 and a movie. Rehearsal and movie tomorrow, yes.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:06:25.062457+00:00"
+    },
+    {
+      "text": "No, let us go some other time. Maybe tomorrow.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:12:22.402582+00:00"
+    },
+    {
+      "text": "Got it, I noted that.",
+      "intent": "custom",
+      "tone": "neutral",
+      "length": "short",
+      "partner_type": "friend_or_general",
+      "bucket_id": "clarify_calm",
+      "weight": 1.1,
+      "source": "session_confirmation",
+      "last_used": "2026-05-03T06:12:22.471589+00:00"
     }
   ]
 }

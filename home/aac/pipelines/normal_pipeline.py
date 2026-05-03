@@ -13,6 +13,8 @@ from home.aac.pipelines.nodes import (
     face_cue_node,
     face_summary,
     groundedness_guard_node,
+    has_strong_tone_signal,
+    _is_schedule_summary_query,
     is_short_greeting,
     retrieve_from_pool_node,
     router_node,
@@ -115,8 +117,11 @@ def run_normal_pipeline(
             pb_exemplars=pb_exemplars,
             face_summary=face_summary(signals),
         )
-        if llm_options:
+        deterministic_query = is_short_greeting(partner_text) or _is_schedule_summary_query(partner_text)
+        if llm_options and not has_strong_tone_signal(signals) and not deterministic_query:
             options = llm_options + [options[-1]]
+        elif llm_options and (has_strong_tone_signal(signals) or deterministic_query):
+            notes.append("Deterministic tone override kept due to strong face/hand cue.")
         elif generator_error:
             llm_errors.append("Candidate generator fallback.")
     node_trace.append("CandidateGeneratorNode")
@@ -169,6 +174,8 @@ def run_normal_pipeline(
         nod_score=round(float((signals or {}).get("nod_score", 0.0)), 3),
         shake_score=round(float((signals or {}).get("shake_score", 0.0)), 3),
         negative_score=round(float((signals or {}).get("negative_prob", 0.0)), 3),
+        hand_gesture_label=str((signals or {}).get("hand_gesture_label", "") or ""),
+        hand_gesture_score=round(float((signals or {}).get("hand_gesture_score", 0.0)), 3),
     )
     return PipelineResult(
         options=options,

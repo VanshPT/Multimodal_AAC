@@ -33,6 +33,8 @@ class DebugInfo:
     nod_score: float = 0.0
     shake_score: float = 0.0
     negative_score: float = 0.0
+    hand_gesture_label: str = ""
+    hand_gesture_score: float = 0.0
 
 
 @dataclass
@@ -70,4 +72,4 @@ class SpeakResult:
     raw: Dict[str, Any] = field(default_factory=dict)
 
 
-FaceSignals = Optional[Dict[str, float]]
+FaceSignals = Optional[Dict[str, Any]]

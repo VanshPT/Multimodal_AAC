@@ -5,232 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AAC Session</title>
     <style>
-        body {
-            font-family: "Inter", "Segoe UI", Arial, sans-serif;
-            margin: 0;
-            color: #1d2433;
-            background: radial-gradient(circle at top left, #eef3ff 0%, #f6f8fc 45%, #f9fbff 100%);
-        }
-        .container {
-            max-width: 1480px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: minmax(780px, 1fr) 360px;
-            gap: 18px;
-            padding: 18px;
-        }
-        .panel {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid #dfe6f4;
-            box-shadow: 0 10px 30px rgba(23, 52, 110, 0.08);
-        }
-        .main-panel { overflow: hidden; }
-        .side-panel { position: sticky; top: 14px; height: fit-content; }
-        .header-block {
-            background: linear-gradient(130deg, #2f5bda 0%, #4c7af0 45%, #6995ff 100%);
-            color: #ffffff;
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin-bottom: 14px;
-        }
-        .header-title {
-            margin: 0;
-            font-size: 1.25rem;
-            letter-spacing: 0.2px;
-        }
-        .header-subtitle {
-            margin-top: 6px;
-            opacity: 0.95;
-            font-size: 0.92rem;
-        }
-        h3 {
-            margin: 16px 0 8px;
-            font-size: 1.06rem;
-            color: #22314f;
-        }
-        .topbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #e3e9f6;
-            border-radius: 10px;
-            background: #fbfdff;
-        }
-        .topbar label {
-            font-size: 0.92rem;
-            color: #2f3d58;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .topbar button, .topbar select {
-            padding: 8px 11px;
-            border-radius: 9px;
-            border: 1px solid #bbc8e0;
-            background: #ffffff;
-            color: #1f2c45;
-        }
-        .topbar button { cursor: pointer; font-weight: 600; }
-        #startBtn, #sendPartnerBtn, #speakBtn, #confirmBtn {
-            background: #335fda;
-            color: #ffffff;
-            border-color: #335fda;
-        }
-        #startBtn:hover, #sendPartnerBtn:hover, #speakBtn:hover, #confirmBtn:hover {
-            background: #2b52c1;
-            border-color: #2b52c1;
-        }
+        body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1d2433; }
+        .container { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px; }
+        .panel { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .topbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+        .topbar button, .topbar select { padding: 7px 10px; border-radius: 8px; border: 1px solid #bbc4d4; }
         .row { display: flex; gap: 8px; margin-bottom: 8px; }
-        textarea, input[type="text"] {
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid #bfcbdf;
-            padding: 9px 10px;
-            font-size: 0.95rem;
-            background: #ffffff;
-            color: #1d2433;
-        }
-        textarea:focus, input[type="text"]:focus, select:focus {
-            outline: 2px solid #adc2ff;
-            border-color: #7a9aff;
-        }
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .card {
-            border: 1px solid #dbe4f5;
-            border-radius: 12px;
-            padding: 12px;
-            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-            font-size: 0.98rem;
-            line-height: 1.4rem;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-            transition: transform 0.14s ease, box-shadow 0.14s ease;
-        }
-        .card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 16px rgba(30, 65, 140, 0.08);
-        }
-        .card button {
-            margin-top: 9px;
-            width: 100%;
-            padding: 7px;
-            border: 0;
-            border-radius: 7px;
-            background: #4263eb;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .sticky-edit {
-            position: sticky;
-            top: 0;
-            background: #ffffff;
-            padding: 8px 0 2px;
-            z-index: 2;
-            border-top: 1px solid #eef2fb;
-            border-bottom: 1px solid #eef2fb;
-            margin: 12px 0;
-        }
-        .group h4 { margin-bottom: 6px; color: #26334f; }
+        textarea, input[type="text"] { width: 100%; border-radius: 8px; border: 1px solid #bbc4d4; padding: 8px; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
+        .card { border: 1px solid #d6dded; border-radius: 8px; padding: 12px; background: #fbfcff; font-size: 0.98rem; line-height: 1.35rem; word-break: break-word; overflow-wrap: anywhere; }
+        .card button { margin-top: 8px; width: 100%; padding: 6px; border: 0; border-radius: 6px; background: #4263eb; color: #fff; cursor: pointer; }
+        .sticky-edit { position: sticky; top: 0; background: #fff; padding-top: 4px; z-index: 2; }
+        .group h4 { margin-bottom: 4px; }
         .group-header { display: flex; justify-content: space-between; align-items: center; }
-        .group-header button {
-            border: 1px solid #bfcbe2;
-            background: #fff;
-            border-radius: 8px;
-            padding: 5px 8px;
-            cursor: pointer;
-        }
-        .group-item {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-            padding: 8px;
-            border: 1px solid #e3e9f6;
-            border-radius: 8px;
-            background: #fcfdff;
-        }
-        .group-item button {
-            min-width: 74px;
-            border: 0;
-            border-radius: 7px;
-            background: #2f5ad7;
-            color: #ffffff;
-            cursor: pointer;
-        }
-        video {
-            width: 280px;
-            height: 205px;
-            border-radius: 12px;
-            background: #1d2433;
-            border: 1px solid #cad4e7;
-        }
-        .chip {
-            display: inline-block;
-            background: #eef2ff;
-            border: 1px solid #ccd6ff;
-            border-radius: 14px;
-            padding: 3px 9px;
-            margin-right: 6px;
-            margin-bottom: 4px;
-            font-size: 0.85rem;
-            color: #304162;
-        }
+        .group-item { display: flex; gap: 8px; margin-bottom: 8px; }
+        .group-item button { min-width: 70px; }
+        video { width: 230px; height: 170px; border-radius: 8px; background: #222; }
+        .chip { display: inline-block; background: #eef2ff; border: 1px solid #ccd6ff; border-radius: 12px; padding: 2px 8px; margin-right: 6px; }
         .muted { color: #687086; font-size: 0.92rem; }
-        .error-banner {
+        .error-banner { display: none; margin: 8px 0; padding: 8px 10px; border-radius: 8px; border: 1px solid #f3b2b2; background: #fff0f0; color: #8b1f1f; }
+        .final-output { border: 1px solid #c5f0cf; background: #edfff2; border-radius: 8px; padding: 8px; margin-top: 8px; }
+        .transcript { max-height: 220px; overflow-y: auto; border: 1px solid #d6dded; border-radius: 8px; padding: 8px; background: #fff; }
+        .memory-toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
             display: none;
-            margin: 8px 0;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid #f3b2b2;
-            background: #fff0f0;
-            color: #8b1f1f;
-        }
-        .final-output {
-            border: 1px solid #c5f0cf;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #9ed8ae;
             background: #edfff2;
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 8px;
-            white-space: pre-wrap;
+            color: #1f5f33;
+            box-shadow: 0 8px 24px rgba(29, 36, 51, 0.12);
         }
-        .transcript {
-            max-height: 230px;
-            overflow-y: auto;
-            border: 1px solid #d6dded;
-            border-radius: 10px;
-            padding: 8px;
-            background: #fff;
-        }
-        .section-box {
-            border: 1px solid #e5ebf8;
-            border-radius: 10px;
-            padding: 10px;
-            background: #fbfdff;
-            margin-bottom: 10px;
-        }
-        @media (max-width: 1200px) {
-            .container { grid-template-columns: 1fr; }
-            .side-panel { position: static; }
+        .memory-toast button {
+            border: 0;
+            background: transparent;
+            color: #1f5f33;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0 2px;
         }
     </style>
 </head>
 <body>
+    <div id="memoryToast" class="memory-toast" role="status" aria-live="polite">
+        <span id="memoryToastText">Memory updated.</span>
+        <button id="memoryToastClose" type="button" aria-label="Dismiss memory update message">×</button>
+    </div>
     <div class="container">
-        <section class="panel main-panel">
-            <div class="header-block">
-                <h2 class="header-title">AAC Session Console</h2>
-                <div class="header-subtitle">Memory-grounded reply generation with multimodal face and gesture cues</div>
-            </div>
+        <section class="panel">
+            <h2>AAC Session</h2>
             <div id="llmErrorBanner" class="error-banner"></div>
             <div class="topbar">
                 <label>User:
@@ -250,6 +79,10 @@
                     <option value="neutral">neutral</option>
                     <option value="nod_yes">nod_yes</option>
                     <option value="shake_no">shake_no</option>
+                    <option value="indian_nod">indian_nod</option>
+                    <option value="thumbs_up">thumbs_up</option>
+                    <option value="thumbs_down">thumbs_down</option>
+                    <option value="open_palm">open_palm</option>
                 </select>
                 <label><input type="checkbox" id="pbToggle" checked> PB Enabled</label>
                 <button id="speakBtn" disabled>SPEAK</button>
@@ -260,7 +93,7 @@
                 <span id="liveClock" class="chip">Local time: --</span>
             </div>
 
-            <div class="section-box row">
+            <div class="row">
                 <div>
                     <video id="cameraPreview" autoplay playsinline hidden></video>
                     <div id="faceStatus" class="muted">Camera OFF</div>
@@ -268,7 +101,7 @@
             </div>
 
             <h3>Normal mode</h3>
-            <div class="section-box row">
+            <div class="row">
                 <input type="text" id="partnerInput" placeholder="Partner message">
                 <button id="sendPartnerBtn">Send Partner Message</button>
             </div>
@@ -282,7 +115,7 @@
             </div>
 
             <h3>Speak mode suggestions</h3>
-            <div id="speakSuggestions" class="section-box"></div>
+            <div id="speakSuggestions"></div>
 
             <h3>Transcript</h3>
             <div id="transcript" class="transcript"></div>
@@ -308,7 +141,7 @@
                 <div style="margin-top:8px;"><a href="/metrics/">Open full metrics page</a></div>
             </div>
         </section>
-        <aside class="panel side-panel">
+        <aside class="panel">
             <h3>Debug / Explainability</h3>
             <div><span class="chip">Router</span><span id="dbgRouter">-</span></div>
             <div><span class="chip">Sources</span><span id="dbgSources">-</span></div>
@@ -320,6 +153,9 @@
             <div><span class="chip">Nod score</span><span id="dbgNodScore">-</span></div>
             <div><span class="chip">Shake score</span><span id="dbgShakeScore">-</span></div>
             <div><span class="chip">Negative score</span><span id="dbgNegativeScore">-</span></div>
+            <div><span class="chip">Hand gesture</span><span id="dbgGesture">-</span></div>
+            <div><span class="chip">Gesture score</span><span id="dbgGestureScore">-</span></div>
+            <div><span class="chip">Vision engine</span><span id="dbgEngine">-</span></div>
             <div><span class="chip">Search order</span><span id="dbgOrder">-</span></div>
             <div><span class="chip">Buckets</span><span id="dbgBuckets">-</span></div>
             <div><span class="chip">Latency</span><span id="dbgLatency">-</span></div>
@@ -338,15 +174,24 @@ let lastPartnerText = "";
 let latestFaceSignals = null;
 let stream = null;
 let faceLandmarker = null;
+let gestureRecognizer = null;
 let faceLandmarkerReady = false;
 let faceLandmarkerFailed = false;
+let gestureRecognizerReady = false;
+let gestureRecognizerFailed = false;
 let faceInitError = "";
+let gestureInitError = "";
 let faceEngine = "none";
 let facePollingTimer = null;
 let headHistory = [];
+let handHistory = [];
+let motionLatch = { nodUntil: 0, shakeUntil: 0 };
+let recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: 0 };
+let lastSubmittedSignals = null;
 let lastQueryId = "";
 const transcript = [];
 let metricsHistory = [];
+let memoryToastTimer = null;
 
 function localNowIso() {
     return new Date().toISOString();
@@ -365,20 +210,221 @@ function startClock() {
 
 function smoothFaceSignals(raw) {
     if (!raw) return null;
-    if (!latestFaceSignals) return raw;
+    if (!latestFaceSignals) {
+        const first = { ...raw };
+        first.smile_score = first.smile_score ?? first.smile_prob ?? 0;
+        first.smile_prob = first.smile_score;
+        first.confused_prob = first.confused_prob ?? 0;
+        first.neutral_prob = first.neutral_prob ?? 0;
+        first.negative_prob = first.negative_prob ?? 0;
+        first.nod_score = first.nod_score ?? 0;
+        first.shake_score = first.shake_score ?? 0;
+        first.hand_gesture_label = first.hand_gesture_label || "";
+        first.hand_gesture_score = first.hand_gesture_score ?? 0;
+        first.face_detected = first.face_detected ?? true;
+        first.hand_detected = first.hand_detected ?? Boolean(first.hand_gesture_label);
+        return first;
+    }
     const alpha = 0.65;
+    const motionAlpha = 0.45;
+    const previousGesture = latestFaceSignals.hand_gesture_label || "";
+    const previousGestureScore = latestFaceSignals.hand_gesture_score ?? 0;
+    const currentGesture = raw.hand_gesture_label || "";
     const smooth = {
         smile_score: alpha * (latestFaceSignals.smile_score ?? latestFaceSignals.smile_prob ?? 0) + (1 - alpha) * (raw.smile_score ?? raw.smile_prob ?? 0),
-        confused_prob: alpha * latestFaceSignals.confused_prob + (1 - alpha) * raw.confused_prob,
-        neutral_prob: alpha * latestFaceSignals.neutral_prob + (1 - alpha) * raw.neutral_prob
+        confused_prob: alpha * (latestFaceSignals.confused_prob ?? 0) + (1 - alpha) * (raw.confused_prob ?? 0),
+        neutral_prob: alpha * (latestFaceSignals.neutral_prob ?? 0) + (1 - alpha) * (raw.neutral_prob ?? 0),
+        negative_prob: alpha * (latestFaceSignals.negative_prob ?? 0) + (1 - alpha) * (raw.negative_prob ?? 0),
+        nod_score: motionAlpha * (latestFaceSignals.nod_score ?? 0) + (1 - motionAlpha) * (raw.nod_score ?? 0),
+        shake_score: motionAlpha * (latestFaceSignals.shake_score ?? 0) + (1 - motionAlpha) * (raw.shake_score ?? 0),
+        hand_gesture_label: currentGesture || previousGesture,
+        hand_gesture_score: currentGesture
+            ? alpha * (currentGesture === previousGesture ? previousGestureScore : 0) + (1 - alpha) * (raw.hand_gesture_score ?? 0)
+            : Math.max(0, (previousGestureScore || 0) * 0.7),
+        face_detected: raw.face_detected ?? latestFaceSignals.face_detected ?? true,
+        hand_detected: raw.hand_detected ?? latestFaceSignals.hand_detected ?? false,
+        handedness: raw.handedness || latestFaceSignals.handedness || "",
     };
     const total = smooth.smile_score + smooth.confused_prob + smooth.neutral_prob || 1;
     smooth.smile_score /= total;
     smooth.confused_prob /= total;
     smooth.neutral_prob /= total;
-    smooth.face_detected = raw.face_detected ?? true;
     smooth.smile_prob = smooth.smile_score;
+    if (!smooth.hand_detected || smooth.hand_gesture_score < 0.25) {
+        smooth.hand_gesture_label = "";
+        smooth.hand_gesture_score = 0;
+    }
     return smooth;
+}
+
+function clamp01(value) {
+    return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
+}
+
+function countDirectionChanges(values, minStep = 1.5) {
+    let direction = 0;
+    let changes = 0;
+    for (let i = 1; i < values.length; i += 1) {
+        const delta = values[i] - values[i - 1];
+        if (Math.abs(delta) < minStep) continue;
+        const nextDirection = delta > 0 ? 1 : -1;
+        if (direction && nextDirection !== direction) changes += 1;
+        direction = nextDirection;
+    }
+    return changes;
+}
+
+function stabilizeMotionScore(key, score, nowMs) {
+    const holdMs = 900;
+    if (score >= 0.62) {
+        motionLatch[`${key}Until`] = nowMs + holdMs;
+        return Math.max(score, 0.72);
+    }
+    if ((motionLatch[`${key}Until`] || 0) > nowMs) {
+        return Math.max(score, 0.58);
+    }
+    return score;
+}
+
+function deriveHeadMotionScores(nowMs) {
+    headHistory = headHistory.filter((item) => nowMs - item.t <= 1600);
+    const recent = headHistory.slice(-12);
+    if (recent.length < 4) {
+        return { nodScore: 0, shakeScore: 0, wobbleScore: 0 };
+    }
+    const pitchValues = recent.map((item) => item.pitch);
+    const yawValues = recent.map((item) => item.yaw);
+    const pitchRange = Math.max(...pitchValues) - Math.min(...pitchValues);
+    const yawRange = Math.max(...yawValues) - Math.min(...yawValues);
+    const maxAbsPitch = Math.max(...pitchValues.map((value) => Math.abs(value)));
+    const maxAbsYaw = Math.max(...yawValues.map((value) => Math.abs(value)));
+    const pitchChanges = countDirectionChanges(pitchValues, 1.2);
+    const yawChanges = countDirectionChanges(yawValues, 1.2);
+    let nodScore = clamp01((pitchRange - 7) / 11) * (pitchChanges >= 2 ? 1 : 0.55);
+    let shakeScore = clamp01((yawRange - 8) / 12) * (yawChanges >= 2 ? 1 : 0.55);
+    let wobbleScore = 0;
+    if (maxAbsPitch > 10) nodScore = clamp01(nodScore + 0.12);
+    if (maxAbsYaw > 14 && yawChanges >= 2) shakeScore = clamp01(shakeScore + 0.18);
+    if (yawRange > pitchRange * 1.35) nodScore *= 0.75;
+    if (pitchRange > yawRange * 1.35) shakeScore *= 0.75;
+    if (yawChanges >= 2 && yawRange >= 4 && yawRange <= 11 && maxAbsYaw >= 6 && shakeScore < 0.58) {
+        wobbleScore = clamp01(((yawRange - 4) / 7) * 0.7 + (yawChanges >= 3 ? 0.2 : 0.05));
+        if (pitchRange > 9) wobbleScore *= 0.75;
+    }
+    nodScore = stabilizeMotionScore("nod", nodScore, nowMs);
+    shakeScore = stabilizeMotionScore("shake", shakeScore, nowMs);
+    return { nodScore: clamp01(nodScore), shakeScore: clamp01(shakeScore), wobbleScore: clamp01(wobbleScore) };
+}
+
+function buildNeutralSignalBaseline(overrides = {}) {
+    return {
+        smile_prob: 0.2,
+        confused_prob: 0.2,
+        neutral_prob: 0.6,
+        negative_prob: 0.1,
+        nod_score: 0.1,
+        shake_score: 0.1,
+        face_detected: true,
+        hand_detected: false,
+        hand_gesture_label: "",
+        hand_gesture_score: 0,
+        handedness: "",
+        ...overrides,
+    };
+}
+
+function updateRecentSignalPeaks(signals) {
+    const nowMs = Date.now();
+    if (!recentSignalPeaks.updatedAt || nowMs - recentSignalPeaks.updatedAt > 1800) {
+        recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: nowMs };
+    }
+    recentSignalPeaks.nod_score = Math.max(recentSignalPeaks.nod_score || 0, signals?.nod_score || 0);
+    recentSignalPeaks.shake_score = Math.max(recentSignalPeaks.shake_score || 0, signals?.shake_score || 0);
+    recentSignalPeaks.confused_prob = Math.max(recentSignalPeaks.confused_prob || 0, signals?.confused_prob || 0);
+    recentSignalPeaks.negative_prob = Math.max(recentSignalPeaks.negative_prob || 0, signals?.negative_prob || 0);
+    if ((signals?.hand_gesture_label || "") && (signals?.hand_gesture_score || 0) >= 0.45) {
+        recentSignalPeaks.hand_gesture_label = signals?.hand_gesture_label || "";
+        recentSignalPeaks.hand_gesture_score = signals?.hand_gesture_score || 0;
+        recentSignalPeaks.hand_updated_at = nowMs;
+    }
+    recentSignalPeaks.updatedAt = nowMs;
+}
+
+function buildRequestSignals() {
+    if (!latestFaceSignals) return null;
+    const snapshot = JSON.parse(JSON.stringify(latestFaceSignals));
+    const nowMs = Date.now();
+    const peaksAreFresh = recentSignalPeaks.updatedAt && nowMs - recentSignalPeaks.updatedAt <= 1800;
+    const blendMotionPeak = (currentValue, peakValue) => {
+        const current = currentValue ?? 0;
+        const peak = peakValue ?? 0;
+        if (peak < 0.58) return Math.max(current, peak);
+        if (current >= 0.52) return Math.max(current, peak);
+        if (current >= 0.35 && Math.abs(peak - current) <= 0.22) return Math.max(current, peak);
+        return current;
+    };
+    const blendEmotionPeak = (currentValue, peakValue) => {
+        const current = currentValue ?? 0;
+        const peak = peakValue ?? 0;
+        if (peak < 0.48) return Math.max(current, peak);
+        if (current >= 0.4) return Math.max(current, peak);
+        if (current >= 0.25 && Math.abs(peak - current) <= 0.18) return Math.max(current, peak);
+        return current;
+    };
+    if (peaksAreFresh) {
+        snapshot.nod_score = blendMotionPeak(snapshot.nod_score, recentSignalPeaks.nod_score || 0);
+        snapshot.shake_score = blendMotionPeak(snapshot.shake_score, recentSignalPeaks.shake_score || 0);
+        snapshot.confused_prob = blendEmotionPeak(snapshot.confused_prob, recentSignalPeaks.confused_prob || 0);
+        snapshot.negative_prob = blendEmotionPeak(snapshot.negative_prob, recentSignalPeaks.negative_prob || 0);
+        const currentHandIsStable = Boolean((snapshot.hand_gesture_label || "") && (snapshot.hand_gesture_score || 0) >= 0.45);
+        const recentHandIsFresh = recentSignalPeaks.hand_updated_at && nowMs - recentSignalPeaks.hand_updated_at <= 1400;
+        if (!currentHandIsStable && recentHandIsFresh && (recentSignalPeaks.hand_gesture_score || 0) >= 0.45) {
+            snapshot.hand_gesture_label = recentSignalPeaks.hand_gesture_label || "";
+            snapshot.hand_gesture_score = recentSignalPeaks.hand_gesture_score || 0;
+            snapshot.hand_detected = Boolean(snapshot.hand_gesture_label);
+        }
+    }
+    return snapshot;
+}
+
+function stabilizeGestureLabel(label, score, handedness, nowMs) {
+    if (label && label !== "None" && score >= 0.45) {
+        handHistory.push({ label, score, handedness, t: nowMs });
+    }
+    handHistory = handHistory.filter((item) => nowMs - item.t <= 1600);
+    const grouped = new Map();
+    handHistory.forEach((item) => {
+        const bucket = grouped.get(item.label) || { count: 0, totalScore: 0, handedness: item.handedness };
+        bucket.count += 1;
+        bucket.totalScore += item.score;
+        bucket.handedness = item.handedness || bucket.handedness;
+        grouped.set(item.label, bucket);
+    });
+    let bestLabel = "";
+    let bestCount = 0;
+    let bestAvg = 0;
+    let bestHandedness = "";
+    grouped.forEach((bucket, gestureLabel) => {
+        const avg = bucket.totalScore / bucket.count;
+        if (bucket.count > bestCount || (bucket.count === bestCount && avg > bestAvg)) {
+            bestLabel = gestureLabel;
+            bestCount = bucket.count;
+            bestAvg = avg;
+            bestHandedness = bucket.handedness;
+        }
+    });
+    if (bestLabel && (bestCount >= 2 || bestAvg >= 0.78)) {
+        return { hand_gesture_label: bestLabel, hand_gesture_score: clamp01(bestAvg), hand_detected: true, handedness: bestHandedness };
+    }
+    if (latestFaceSignals?.hand_gesture_label && (latestFaceSignals.hand_gesture_score ?? 0) > 0.45) {
+        return {
+            hand_gesture_label: latestFaceSignals.hand_gesture_label,
+            hand_gesture_score: clamp01((latestFaceSignals.hand_gesture_score ?? 0) * 0.85),
+            hand_detected: true,
+            handedness: latestFaceSignals.handedness || "",
+        };
+    }
+    return { hand_gesture_label: "", hand_gesture_score: 0, hand_detected: false, handedness: "" };
 }
 
 async function postJSON(url, body) {
@@ -391,34 +437,56 @@ async function postJSON(url, body) {
 }
 
 async function initMediaPipeFace() {
-    if (faceLandmarkerReady || faceLandmarkerFailed) return;
+    if ((faceLandmarkerReady || faceLandmarkerFailed) && (gestureRecognizerReady || gestureRecognizerFailed)) return;
     try {
         let visionApi = window.vision || null;
         if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
             const moduleRef = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14");
             visionApi = moduleRef.vision || moduleRef;
         }
-        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
+        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker || !visionApi.GestureRecognizer) {
             throw new Error("MediaPipe tasks-vision did not expose FaceLandmarker");
         }
         const fileset = await visionApi.FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
         );
-        faceLandmarker = await visionApi.FaceLandmarker.createFromOptions(fileset, {
-            baseOptions: {
-                modelAssetPath:
-                    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-            },
-            outputFaceBlendshapes: true,
-            runningMode: "VIDEO",
-            numFaces: 1,
-        });
+        if (!faceLandmarkerReady && !faceLandmarkerFailed) {
+            faceLandmarker = await visionApi.FaceLandmarker.createFromOptions(fileset, {
+                baseOptions: {
+                    modelAssetPath:
+                        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+                },
+                outputFaceBlendshapes: true,
+                outputFacialTransformationMatrixes: true,
+                runningMode: "VIDEO",
+                numFaces: 1,
+            });
+        }
+        if (!gestureRecognizerReady && !gestureRecognizerFailed) {
+            gestureRecognizer = await visionApi.GestureRecognizer.createFromOptions(fileset, {
+                baseOptions: {
+                    modelAssetPath:
+                        "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+                },
+                runningMode: "VIDEO",
+                numHands: 1,
+            });
+        }
         faceLandmarkerReady = true;
-        faceEngine = "mediapipe";
+        gestureRecognizerReady = true;
+        faceEngine = "mediapipe-face+hand";
         faceInitError = "";
+        gestureInitError = "";
     } catch (error) {
-        faceLandmarkerFailed = true;
-        faceInitError = error?.message || String(error);
+        const text = error?.message || String(error);
+        if (!faceLandmarkerReady) {
+            faceLandmarkerFailed = true;
+            faceInitError = text;
+        }
+        if (!gestureRecognizerReady) {
+            gestureRecognizerFailed = true;
+            gestureInitError = text;
+        }
         faceEngine = "fallback";
     }
 }
@@ -444,6 +512,16 @@ function renderDebug(info) {
     }
     if (document.getElementById("dbgNegativeScore")) {
         document.getElementById("dbgNegativeScore").innerText = info.negative_score ?? "-";
+    }
+    if (document.getElementById("dbgGesture")) {
+        document.getElementById("dbgGesture").innerText = info.hand_gesture_label || lastSubmittedSignals?.hand_gesture_label || "-";
+    }
+    if (document.getElementById("dbgGestureScore")) {
+        const score = info.hand_gesture_score ?? lastSubmittedSignals?.hand_gesture_score;
+        document.getElementById("dbgGestureScore").innerText = score ?? "-";
+    }
+    if (document.getElementById("dbgEngine")) {
+        document.getElementById("dbgEngine").innerText = faceEngine || "-";
     }
     document.getElementById("dbgOrder").innerText = (info.search_order || []).join(" -> ");
     document.getElementById("dbgBuckets").innerText = (info.buckets_chosen || []).join(", ");
@@ -536,30 +614,63 @@ function renderTranscript() {
     ).join("");
 }
 
+function showMemoryToast(message = "Memory updated.") {
+    const toast = document.getElementById("memoryToast");
+    const text = document.getElementById("memoryToastText");
+    if (!toast || !text) return;
+    text.innerText = message;
+    toast.style.display = "inline-flex";
+    if (memoryToastTimer) {
+        window.clearTimeout(memoryToastTimer);
+    }
+    memoryToastTimer = window.setTimeout(() => {
+        toast.style.display = "none";
+        memoryToastTimer = null;
+    }, 3200);
+}
+
+function hideMemoryToast() {
+    const toast = document.getElementById("memoryToast");
+    if (!toast) return;
+    toast.style.display = "none";
+    if (memoryToastTimer) {
+        window.clearTimeout(memoryToastTimer);
+        memoryToastTimer = null;
+    }
+}
+
 async function detectFaceSignals() {
     if (document.getElementById("simulateFaceToggle").checked) {
         const preset = document.getElementById("simulateFacePreset").value;
         if (preset === "smile") {
-            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.9, confused_prob: 0.05, neutral_prob: 0.05, nod_score: 0.65, shake_score: 0.1, negative_prob: 0.05 });
-            latestFaceSignals.face_detected = true;
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.9, confused_prob: 0.05, neutral_prob: 0.05, nod_score: 0.65, shake_score: 0.1, negative_prob: 0.05 }));
             document.getElementById("faceStatus").innerText = "Simulated face: smile";
         } else if (preset === "confused") {
-            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.1, confused_prob: 0.85, neutral_prob: 0.05, nod_score: 0.1, shake_score: 0.3, negative_prob: 0.3 });
-            latestFaceSignals.face_detected = true;
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.1, confused_prob: 0.85, neutral_prob: 0.05, nod_score: 0.1, shake_score: 0.3, negative_prob: 0.3 }));
             document.getElementById("faceStatus").innerText = "Simulated face: confused";
         } else if (preset === "nod_yes") {
-            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.35, confused_prob: 0.1, neutral_prob: 0.55, nod_score: 0.85, shake_score: 0.08, negative_prob: 0.05 });
-            latestFaceSignals.face_detected = true;
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.35, confused_prob: 0.1, neutral_prob: 0.55, nod_score: 0.85, shake_score: 0.08, negative_prob: 0.05 }));
             document.getElementById("faceStatus").innerText = "Simulated face: nod yes";
         } else if (preset === "shake_no") {
-            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.05, confused_prob: 0.35, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.86, negative_prob: 0.7 });
-            latestFaceSignals.face_detected = true;
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.05, confused_prob: 0.35, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.86, negative_prob: 0.7 }));
             document.getElementById("faceStatus").innerText = "Simulated face: shake no";
+        } else if (preset === "indian_nod") {
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.12, confused_prob: 0.72, neutral_prob: 0.16, nod_score: 0.12, shake_score: 0.18, negative_prob: 0.08 }));
+            document.getElementById("faceStatus").innerText = "Simulated face: indian nod / unsure";
+        } else if (preset === "thumbs_up") {
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.45, confused_prob: 0.1, neutral_prob: 0.45, hand_detected: true, hand_gesture_label: "Thumb_Up", hand_gesture_score: 0.92, handedness: "Right" }));
+            document.getElementById("faceStatus").innerText = "Simulated hand: thumbs up";
+        } else if (preset === "thumbs_down") {
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.05, confused_prob: 0.2, neutral_prob: 0.75, negative_prob: 0.55, hand_detected: true, hand_gesture_label: "Thumb_Down", hand_gesture_score: 0.92, handedness: "Right" }));
+            document.getElementById("faceStatus").innerText = "Simulated hand: thumbs down";
+        } else if (preset === "open_palm") {
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.15, confused_prob: 0.55, neutral_prob: 0.3, hand_detected: true, hand_gesture_label: "Open_Palm", hand_gesture_score: 0.9, handedness: "Right" }));
+            document.getElementById("faceStatus").innerText = "Simulated hand: open palm";
         } else {
-            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.1, negative_prob: 0.1 });
-            latestFaceSignals.face_detected = true;
+            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline());
             document.getElementById("faceStatus").innerText = "Simulated face: neutral";
         }
+        updateRecentSignalPeaks(latestFaceSignals);
         return latestFaceSignals;
     }
     if (!document.getElementById("cameraToggle").checked || !stream) {
@@ -573,9 +684,13 @@ async function detectFaceSignals() {
         status.innerText = "Camera warming up...";
         return latestFaceSignals;
     }
+    const nowMs = Date.now();
+    let rawSignals = buildNeutralSignalBaseline({ face_detected: false });
+    let faceDetected = false;
+    let gestureText = "";
     if (faceLandmarkerReady && faceLandmarker) {
         try {
-            const result = faceLandmarker.detectForVideo(video, Date.now());
+            const result = faceLandmarker.detectForVideo(video, nowMs);
             if (result.faceBlendshapes && result.faceBlendshapes.length > 0) {
                 const categories = result.faceBlendshapes[0].categories || [];
                 const scoreFor = (name) => {
@@ -606,64 +721,77 @@ async function detectFaceSignals() {
                     yaw = Math.atan2(r20, Math.sqrt(r21 * r21 + r22 * r22)) * 57.2958;
                     if (!Number.isFinite(yaw)) yaw = Math.atan2(-r10, r00) * 57.2958;
                 }
-                headHistory.push({ pitch, yaw, t: Date.now() });
+                headHistory.push({ pitch, yaw, t: nowMs });
                 if (headHistory.length > 16) headHistory = headHistory.slice(-16);
-                const recent = headHistory.slice(-12);
-                const pitchRange = recent.length ? Math.max(...recent.map((h) => h.pitch)) - Math.min(...recent.map((h) => h.pitch)) : 0;
-                const yawRange = recent.length ? Math.max(...recent.map((h) => h.yaw)) - Math.min(...recent.map((h) => h.yaw)) : 0;
-                const nodScore = Math.max(0, Math.min(1, (pitchRange - 8) / 15));
-                const shakeScore = Math.max(0, Math.min(1, (yawRange - 10) / 18));
-                latestFaceSignals = smoothFaceSignals({
+                const motion = deriveHeadMotionScores(nowMs);
+                const confusedBoost = Math.max(confused, clamp01(motion.wobbleScore * 0.92));
+                const neutralAfterWobble = Math.max(0, 1 - smile - confusedBoost);
+                rawSignals = buildNeutralSignalBaseline({
                     smile_prob: Math.min(1, smile),
-                    confused_prob: Math.min(1, confused),
-                    neutral_prob: Math.min(1, neutral),
+                    confused_prob: Math.min(1, confusedBoost),
+                    neutral_prob: Math.min(1, Math.max(neutral, neutralAfterWobble)),
                     negative_prob: Math.min(1, negative),
-                    nod_score: nodScore,
-                    shake_score: shakeScore,
+                    nod_score: motion.nodScore,
+                    shake_score: motion.shakeScore,
                     face_detected: true,
                 });
-                status.innerText = `Face detected (MediaPipe blendshapes) nod:${nodScore.toFixed(2)} shake:${shakeScore.toFixed(2)}`;
-                return latestFaceSignals;
+                faceDetected = true;
             }
-            status.innerText = "MediaPipe active, face not confidently detected yet";
         } catch (error) {
-            status.innerText = `MediaPipe detect error: ${error?.message || "unknown error"}`;
+            status.innerText = `MediaPipe face error: ${error?.message || "unknown error"}`;
         }
     }
-    if ("FaceDetector" in window) {
+    if (gestureRecognizerReady && gestureRecognizer) {
+        try {
+            const gestureResult = gestureRecognizer.recognizeForVideo(video, nowMs);
+            const gestureCategory = gestureResult?.gestures?.[0]?.[0] || null;
+            const handednessCategory = gestureResult?.handednesses?.[0]?.[0] || null;
+            const label = gestureCategory?.categoryName || "";
+            const score = gestureCategory?.score || 0;
+            const handedness = handednessCategory?.displayName || handednessCategory?.categoryName || "";
+            const stableGesture = stabilizeGestureLabel(label, score, handedness, nowMs);
+            rawSignals = { ...rawSignals, ...stableGesture };
+            if (stableGesture.hand_detected) {
+                gestureText = `${stableGesture.hand_gesture_label} ${stableGesture.handedness ? `(${stableGesture.handedness})` : ""}`.trim();
+            }
+        } catch (error) {
+            gestureText = "";
+        }
+    }
+    if (!faceDetected && "FaceDetector" in window) {
         try {
             const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
             const faces = await detector.detect(video);
             if (faces.length > 0) {
                 const width = faces[0].boundingBox.width || 1;
                 const smileProb = Math.min(1, Math.max(0.2, width / 260));
-                latestFaceSignals = smoothFaceSignals({
+                rawSignals = {
+                    ...rawSignals,
                     smile_prob: smileProb,
                     confused_prob: 1 - smileProb,
-                    neutral_prob: 0.2,
+                    neutral_prob: 0.2 + Math.max(0, rawSignals.neutral_prob - 0.2),
                     negative_prob: 0.15,
                     nod_score: 0.1,
                     shake_score: 0.1,
-                });
-                latestFaceSignals.face_detected = true;
-                status.innerText = "Face detected";
-            } else {
-                latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
-                status.innerText = "FaceDetector active but low confidence; using neutral fallback";
+                    face_detected: true,
+                };
+                faceDetected = true;
             }
         } catch (error) {
-            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
             status.innerText = `FaceDetector error; neutral fallback (${error?.message || "unknown"})`;
         }
+    }
+    latestFaceSignals = smoothFaceSignals(rawSignals);
+    updateRecentSignalPeaks(latestFaceSignals);
+    const gestureSuffix = gestureText ? ` gesture:${gestureText}` : "";
+    if (faceDetected) {
+        status.innerText = `Vision active (${faceEngine}) nod:${(latestFaceSignals?.nod_score ?? 0).toFixed(2)} shake:${(latestFaceSignals?.shake_score ?? 0).toFixed(2)}${gestureSuffix}`;
+    } else if (latestFaceSignals?.hand_detected) {
+        status.innerText = `Hand gesture detected (${faceEngine})${gestureSuffix}`;
+    } else if (faceLandmarkerFailed && gestureRecognizerFailed) {
+        status.innerText = `Vision init failed (${faceInitError || gestureInitError || "unknown"}); using neutral fallback`;
     } else {
-        latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
-        if (faceLandmarkerFailed) {
-            status.innerText = `No FaceDetector API + MediaPipe init failed (${faceInitError || "unknown"}); neutral fallback`;
-        } else if (faceLandmarkerReady) {
-            status.innerText = "No FaceDetector API; MediaPipe running";
-        } else {
-            status.innerText = "No FaceDetector API; detector warming up";
-        }
+        status.innerText = `Camera active, waiting for stable face/hand signal (${faceEngine})`;
     }
     return latestFaceSignals;
 }
@@ -677,7 +805,7 @@ function startFacePolling() {
         } catch (error) {
             document.getElementById("faceStatus").innerText = `Face polling error: ${error?.message || "unknown"}`;
         }
-    }, 850);
+    }, 350);
 }
 
 function stopFacePolling() {
@@ -727,6 +855,10 @@ document.getElementById("cameraToggle").onchange = async (event) => {
         }
     } else {
         latestFaceSignals = null;
+        headHistory = [];
+        handHistory = [];
+        motionLatch = { nodUntil: 0, shakeUntil: 0 };
+        recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: 0 };
         stopFacePolling();
         if (stream) {
             stream.getTracks().forEach((track) => track.stop());
@@ -744,12 +876,14 @@ document.getElementById("sendPartnerBtn").onclick = async () => {
     lastPartnerText = partnerText;
     await detectFaceSignals();
     const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const requestSignals = buildRequestSignals();
+    lastSubmittedSignals = requestSignals;
     const data = await postJSON("/aac/api/partner_message/", {
         session_id: sessionId,
         partner_text: partnerText,
         partner_name: document.getElementById("partnerName").value.trim(),
         camera_on: cameraEffective,
-        face_signals: latestFaceSignals,
+        face_signals: requestSignals,
         pb_enabled: document.getElementById("pbToggle").checked,
         client_now: localNowIso(),
     });
@@ -764,10 +898,12 @@ document.getElementById("speakBtn").onclick = async () => {
     if (!sessionId) return alert("Press START first.");
     await detectFaceSignals();
     const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const requestSignals = buildRequestSignals();
+    lastSubmittedSignals = requestSignals;
     const data = await postJSON("/aac/api/speak_mode/", {
         session_id: sessionId,
         camera_on: cameraEffective,
-        face_signals: latestFaceSignals,
+        face_signals: requestSignals,
         client_now: localNowIso(),
     });
     if (data.error) return alert(data.error);
@@ -779,13 +915,14 @@ document.getElementById("confirmBtn").onclick = async () => {
     if (!sessionId) return alert("Press START first.");
     const finalText = document.getElementById("customResponse").value.trim();
     if (!finalText) return alert("Type or select a response first.");
+    const confirmSignals = lastSubmittedSignals || buildRequestSignals() || latestFaceSignals;
     const data = await postJSON("/aac/api/confirm_response/", {
         session_id: sessionId,
         partner_text: lastPartnerText,
         selected_text: selectedText,
         final_text: finalText,
         memory_update_on: document.getElementById("memoryToggle").checked,
-        face_signals: latestFaceSignals,
+        face_signals: confirmSignals,
         query_id: lastQueryId
     });
     if (data.error) return alert(data.error);
@@ -794,7 +931,14 @@ document.getElementById("confirmBtn").onclick = async () => {
     transcript.push({ partner: lastPartnerText, final: data.final_output });
     renderTranscript();
     renderMetrics(data.query_metrics_history || []);
+    if (document.getElementById("memoryToggle").checked && data.memory_update_actions?.stm === "updated") {
+        showMemoryToast("Memory updated.");
+    }
     selectedText = "";
+};
+
+document.getElementById("memoryToastClose").onclick = () => {
+    hideMemoryToast();
 };
 
 startClock();
