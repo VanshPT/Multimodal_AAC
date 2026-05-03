@@ -16,6 +16,24 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _load_env_file(path: Path) -> None:
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_env_file(BASE_DIR / ".env")
+_load_env_file(BASE_DIR / ",env")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -155,3 +173,15 @@ Q_CLUSTER = {
     'bulk': 10,
     'orm': 'default',  # Use Django ORM for task persistence
 }
+
+
+LIVEKIT_URL = os.getenv("LIVEKIT_URL", "").strip()
+LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "").strip()
+LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "").strip()
+AAC_INGEST_SECRET = os.getenv("AAC_INGEST_SECRET", os.getenv("INGEST_SECRET", "")).strip()
+AAC_LIVEKIT_AGENT_NAME = os.getenv("AAC_LIVEKIT_AGENT_NAME", "aac-voice-router").strip() or "aac-voice-router"
+AAC_LIVEKIT_STT_MODEL = os.getenv("AAC_LIVEKIT_STT_MODEL", "deepgram/nova-3").strip() or "deepgram/nova-3"
+AAC_LIVEKIT_TTS_MODEL = os.getenv("AAC_LIVEKIT_TTS_MODEL", "cartesia/sonic-3").strip() or "cartesia/sonic-3"
+AAC_LIVEKIT_TTS_LANGUAGE = os.getenv("AAC_LIVEKIT_TTS_LANGUAGE", "en").strip() or "en"
+AAC_LIVEKIT_LLM_MODEL = os.getenv("AAC_LIVEKIT_LLM_MODEL", "google/gemini-2.5-flash").strip() or "google/gemini-2.5-flash"
+AAC_BACKEND_BASE_URL = os.getenv("AAC_BACKEND_BASE_URL", "http://127.0.0.1:8000").strip().rstrip("/")

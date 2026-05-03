@@ -50,6 +50,50 @@
             cursor: pointer;
             padding: 0 2px;
         }
+        .voice-chip {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #ccd6ff;
+            background: #eef2ff;
+            border-radius: 999px;
+            padding: 5px 10px;
+            color: #27408b;
+        }
+        .voice-chip.active {
+            display: inline-flex;
+        }
+        .voice-pulse {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #e03131;
+            box-shadow: 0 0 0 rgba(224, 49, 49, 0.45);
+            animation: voicePulse 1s infinite;
+        }
+        .voice-pulse.cool {
+            background: #4263eb;
+            box-shadow: 0 0 0 rgba(66, 99, 235, 0.3);
+        }
+        .voice-stop {
+            display: none;
+            border: 1px solid #d0d7ea;
+            background: #fff;
+            color: #1d2433;
+        }
+        .voice-stop.active {
+            display: inline-block;
+        }
+        .speak-btn.listening {
+            background: #ffe3e3;
+            border-color: #ffb3b3;
+            color: #8b1f1f;
+        }
+        @keyframes voicePulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.45); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(224, 49, 49, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0); }
+        }
     </style>
 </head>
 <body>
@@ -85,7 +129,12 @@
                     <option value="open_palm">open_palm</option>
                 </select>
                 <label><input type="checkbox" id="pbToggle" checked> PB Enabled</label>
-                <button id="speakBtn" disabled>SPEAK</button>
+                <button id="speakBtn" class="speak-btn" disabled>SPEAK</button>
+                <span id="voiceStatusChip" class="voice-chip" aria-live="polite">
+                    <span id="voicePulse" class="voice-pulse"></span>
+                    <span id="voiceStatusText">Listening...</span>
+                </span>
+                <button id="stopSpeakBtn" class="voice-stop" type="button" aria-label="Stop voice capture">x</button>
                 <span id="sessionLabel" class="muted">Session not started</span>
             </div>
             <div class="topbar">
@@ -192,6 +241,13 @@ let lastQueryId = "";
 const transcript = [];
 let metricsHistory = [];
 let memoryToastTimer = null;
+let livekitScriptPromise = null;
+let livekitVoiceRoom = null;
+let livekitPlaybackRoom = null;
+let livekitAudioNodes = [];
+let voiceCaptureActive = false;
+let voiceFeatureActivated = false;
+let currentVoiceTurnId = "";
 
 function localNowIso() {
     return new Date().toISOString();
@@ -434,6 +490,241 @@ async function postJSON(url, body) {
         body: JSON.stringify(body)
     });
     return response.json();
+}
+
+async function getJSON(url) {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: { "X-CSRFToken": getCSRFToken() }
+    });
+    return response.json();
+}
+
+function setVoiceUiState(mode, message = "") {
+    const speakBtn = document.getElementById("speakBtn");
+    const stopBtn = document.getElementById("stopSpeakBtn");
+    const chip = document.getElementById("voiceStatusChip");
+    const pulse = document.getElementById("voicePulse");
+    const text = document.getElementById("voiceStatusText");
+    const active = mode !== "idle";
+    chip.classList.toggle("active", active);
+    stopBtn.classList.toggle("active", mode === "listening");
+    speakBtn.classList.toggle("listening", mode === "listening");
+    speakBtn.innerText = mode === "listening" ? "LISTENING" : "SPEAK";
+    pulse.classList.toggle("cool", mode === "processing" || mode === "speaking");
+    text.innerText = message || (mode === "listening" ? "Listening..." : mode === "processing" ? "Finishing..." : mode === "speaking" ? "Speaking..." : "");
+}
+
+function releaseLiveKitAudioNodes() {
+    livekitAudioNodes.forEach((node) => {
+        try {
+            if (node.parentNode) {
+                node.parentNode.removeChild(node);
+            }
+        } catch (error) {
+            console.debug("audio node cleanup skipped", error);
+        }
+    });
+    livekitAudioNodes = [];
+}
+
+async function disconnectLiveKitRoom(room) {
+    if (!room) return;
+    try {
+        await room.disconnect();
+    } catch (error) {
+        console.debug("room disconnect skipped", error);
+    }
+}
+
+function attachLiveKitAudioTrack(track) {
+    const element = track.attach();
+    element.autoplay = true;
+    element.controls = false;
+    element.style.display = "none";
+    document.body.appendChild(element);
+    livekitAudioNodes.push(element);
+}
+
+function getLiveKitNamespace() {
+    return window.livekit || window.LivekitClient || window.LiveKitClient || null;
+}
+
+async function ensureLiveKitClient() {
+    const existing = getLiveKitNamespace();
+    if (existing) return existing;
+    if (!livekitScriptPromise) {
+        livekitScriptPromise = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js";
+            script.async = true;
+            script.onload = () => {
+                const loaded = getLiveKitNamespace();
+                if (loaded) {
+                    resolve(loaded);
+                    return;
+                }
+                reject(new Error("LiveKit client loaded but global namespace was not found."));
+            };
+            script.onerror = () => reject(new Error("Failed to load LiveKit client script."));
+            document.head.appendChild(script);
+        });
+    }
+    return livekitScriptPromise;
+}
+
+async function submitPartnerMessage(partnerText) {
+    if (!sessionId) {
+        alert("Press START first.");
+        return null;
+    }
+    const cleaned = (partnerText || "").trim();
+    if (!cleaned) {
+        alert("Partner message cannot be empty.");
+        return null;
+    }
+    document.getElementById("partnerInput").value = cleaned;
+    lastPartnerText = cleaned;
+    await detectFaceSignals();
+    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const requestSignals = buildRequestSignals();
+    lastSubmittedSignals = requestSignals;
+    const data = await postJSON("/aac/api/partner_message/", {
+        session_id: sessionId,
+        partner_text: cleaned,
+        partner_name: document.getElementById("partnerName").value.trim(),
+        camera_on: cameraEffective,
+        face_signals: requestSignals,
+        pb_enabled: document.getElementById("pbToggle").checked,
+        client_now: localNowIso(),
+    });
+    if (data.error) {
+        alert(data.error);
+        return null;
+    }
+    renderNormalOptions(data.options || []);
+    renderDebug(data.debug_info || {});
+    lastQueryId = data.query_id || "";
+    renderMetrics(data.query_metrics_history || []);
+    return data;
+}
+
+async function startVoiceCapture() {
+    if (!sessionId) {
+        alert("Press START first.");
+        return;
+    }
+    await disconnectLiveKitRoom(livekitPlaybackRoom);
+    livekitPlaybackRoom = null;
+    releaseLiveKitAudioNodes();
+    const LiveKitClient = await ensureLiveKitClient();
+    setVoiceUiState("processing", "Connecting...");
+    const tokenData = await postJSON("/aac/api/livekit/listen_token/", { session_id: sessionId });
+    if (tokenData.error) {
+        setVoiceUiState("idle");
+        alert(tokenData.error);
+        return;
+    }
+    currentVoiceTurnId = tokenData.voice_turn_id || "";
+    const room = new LiveKitClient.Room();
+    room.on(LiveKitClient.RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind === LiveKitClient.Track.Kind.Audio) {
+            attachLiveKitAudioTrack(track);
+        }
+    });
+    await room.connect(tokenData.url, tokenData.token);
+    await room.localParticipant.setMicrophoneEnabled(true);
+    livekitVoiceRoom = room;
+    voiceCaptureActive = true;
+    voiceFeatureActivated = true;
+    setVoiceUiState("listening", "Listening...");
+}
+
+async function stopVoiceCapture() {
+    if (!voiceCaptureActive || !livekitVoiceRoom) return;
+    setVoiceUiState("processing", "Finishing...");
+    try {
+        await livekitVoiceRoom.localParticipant.setMicrophoneEnabled(false);
+    } catch (error) {
+        console.debug("microphone disable skipped", error);
+    }
+    voiceCaptureActive = false;
+    await pollVoiceTranscript();
+}
+
+async function pollVoiceTranscript() {
+    const voiceTurnId = currentVoiceTurnId;
+    if (!voiceTurnId) {
+        setVoiceUiState("idle");
+        return;
+    }
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+        const data = await getJSON(`/aac/api/livekit/transcript/?session_id=${encodeURIComponent(sessionId)}&voice_turn_id=${encodeURIComponent(voiceTurnId)}`);
+        if (data.error) {
+            await disconnectLiveKitRoom(livekitVoiceRoom);
+            livekitVoiceRoom = null;
+            setVoiceUiState("idle");
+            alert(data.error);
+            return;
+        }
+        if (data.ready && data.transcript) {
+            currentVoiceTurnId = "";
+            await disconnectLiveKitRoom(livekitVoiceRoom);
+            livekitVoiceRoom = null;
+            setVoiceUiState("idle");
+            await submitPartnerMessage(data.transcript);
+            return;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 400));
+    }
+    currentVoiceTurnId = "";
+    await disconnectLiveKitRoom(livekitVoiceRoom);
+    livekitVoiceRoom = null;
+    setVoiceUiState("idle");
+    alert("LiveKit did not return a final transcript yet. The worker may not be connected, or the turn did not finalize in time.");
+}
+
+async function speakConfirmedResponse(finalText) {
+    if (!voiceFeatureActivated || !sessionId || !(finalText || "").trim()) return;
+    try {
+        const LiveKitClient = await ensureLiveKitClient();
+        const tokenData = await postJSON("/aac/api/livekit/tts_token/", {
+            session_id: sessionId,
+            text: finalText,
+        });
+        if (tokenData.error) {
+            console.warn(tokenData.error);
+            return;
+        }
+        await disconnectLiveKitRoom(livekitPlaybackRoom);
+        releaseLiveKitAudioNodes();
+        setVoiceUiState("speaking", "Speaking...");
+        const room = new LiveKitClient.Room();
+        room.on(LiveKitClient.RoomEvent.TrackSubscribed, (track) => {
+            if (track.kind === LiveKitClient.Track.Kind.Audio) {
+                attachLiveKitAudioTrack(track);
+            }
+        });
+        await room.connect(tokenData.url, tokenData.token);
+        livekitPlaybackRoom = room;
+        const playbackMs = Math.max(3500, Math.min(10000, finalText.length * 90));
+        window.setTimeout(async () => {
+            try {
+                await room.disconnect();
+            } catch (error) {
+                console.debug("playback disconnect skipped", error);
+            }
+            if (livekitPlaybackRoom === room) {
+                livekitPlaybackRoom = null;
+            }
+            releaseLiveKitAudioNodes();
+            setVoiceUiState("idle");
+        }, playbackMs);
+    } catch (error) {
+        console.error(error);
+        setVoiceUiState("idle");
+    }
 }
 
 async function initMediaPipeFace() {
@@ -834,6 +1125,15 @@ document.getElementById("startBtn").onclick = async () => {
     selectedText = "";
     lastPartnerText = "";
     metricsHistory = [];
+    await disconnectLiveKitRoom(livekitVoiceRoom);
+    await disconnectLiveKitRoom(livekitPlaybackRoom);
+    livekitVoiceRoom = null;
+    livekitPlaybackRoom = null;
+    currentVoiceTurnId = "";
+    voiceCaptureActive = false;
+    voiceFeatureActivated = false;
+    releaseLiveKitAudioNodes();
+    setVoiceUiState("idle");
     renderMetrics([]);
 };
 
@@ -870,45 +1170,20 @@ document.getElementById("cameraToggle").onchange = async (event) => {
 };
 
 document.getElementById("sendPartnerBtn").onclick = async () => {
-    if (!sessionId) return alert("Press START first.");
     const partnerText = document.getElementById("partnerInput").value.trim();
-    if (!partnerText) return alert("Partner message cannot be empty.");
-    lastPartnerText = partnerText;
-    await detectFaceSignals();
-    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
-    const requestSignals = buildRequestSignals();
-    lastSubmittedSignals = requestSignals;
-    const data = await postJSON("/aac/api/partner_message/", {
-        session_id: sessionId,
-        partner_text: partnerText,
-        partner_name: document.getElementById("partnerName").value.trim(),
-        camera_on: cameraEffective,
-        face_signals: requestSignals,
-        pb_enabled: document.getElementById("pbToggle").checked,
-        client_now: localNowIso(),
-    });
-    if (data.error) return alert(data.error);
-    renderNormalOptions(data.options || []);
-    renderDebug(data.debug_info || {});
-    lastQueryId = data.query_id || "";
-    renderMetrics(data.query_metrics_history || []);
+    await submitPartnerMessage(partnerText);
 };
 
 document.getElementById("speakBtn").onclick = async () => {
-    if (!sessionId) return alert("Press START first.");
-    await detectFaceSignals();
-    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
-    const requestSignals = buildRequestSignals();
-    lastSubmittedSignals = requestSignals;
-    const data = await postJSON("/aac/api/speak_mode/", {
-        session_id: sessionId,
-        camera_on: cameraEffective,
-        face_signals: requestSignals,
-        client_now: localNowIso(),
-    });
-    if (data.error) return alert(data.error);
-    renderSpeakSuggestions(data.grouped_suggestions || {});
-    renderDebug(data.debug_info || {});
+    if (voiceCaptureActive) {
+        await stopVoiceCapture();
+        return;
+    }
+    await startVoiceCapture();
+};
+
+document.getElementById("stopSpeakBtn").onclick = async () => {
+    await stopVoiceCapture();
 };
 
 document.getElementById("confirmBtn").onclick = async () => {
@@ -935,6 +1210,7 @@ document.getElementById("confirmBtn").onclick = async () => {
         showMemoryToast("Memory updated.");
     }
     selectedText = "";
+    speakConfirmedResponse(data.final_output);
 };
 
 document.getElementById("memoryToastClose").onclick = () => {

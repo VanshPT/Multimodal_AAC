@@ -1,1 +1,13 @@
-GOOGLE_API=AIzaSyD9tsNPBgEVWBNyrxkbR1gtLH2i5dIyk1w
+GOOGLE_API=AIzaSyBYmUpyDdKw6d1f0xFAgwIu4PiE0RfDXbg
+
+LIVEKIT_URL=wss://multimodal-aac-56rcy9nc.livekit.cloud
+LIVEKIT_API_KEY=API262iTcp5tqbf
+LIVEKIT_API_SECRET=4mennkx7o3jdjnsBYoOUZWQwuZPup1paGHnW47DzjdT
+AAC_INGEST_SECRET=super-secret-aac-bridge-2026-voice
+
+AAC_LIVEKIT_AGENT_NAME=aac-voice-router
+AAC_LIVEKIT_STT_MODEL=deepgram/nova-3
+AAC_LIVEKIT_TTS_MODEL=cartesia/sonic-3
+AAC_LIVEKIT_TTS_LANGUAGE=en
+AAC_LIVEKIT_LLM_MODEL=google/gemini-2.5-flash
+AAC_BACKEND_BASE_URL=http://127.0.0.1:8000
