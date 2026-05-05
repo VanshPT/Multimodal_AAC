@@ -1,19 +1,21 @@
 {
   "date": "2026-04-30",
-  "active_session": {},
+  "active_session": {
+    "session_id": "18fa2130-f0bc-4556-a62f-4ffc6596ca28",
+    "started_at": "2026-05-03T20:37:51.371597+00:00",
+    "updated_at": "2026-05-03T20:43:24.937577+00:00"
+  },
   "current_partner_context": "friends_chat_after_class",
   "current_topic_hints": [
     "movie at 7 PM at Regal North screen 6",
     "finish CSE 635 slides",
     "pick up prescription refill",
-    "ask Omer if free before 6:30 at the campus bus stop"
+    "ask Omer if free before 6:30 at the campus bus stop",
+    "If you already take your medication,"
   ],
   "today_plans": [
     "CSE 635 project check-in at 2:00 PM",
-    "Therapy exercises at 4:30 PM",
-    "Movie with Omer at 7:00 PM at Regal North screen 6",
-    "Take evening medication at 8:30 PM",
-    "Call Vansh before 9:30 PM about slides"
+    "Therapy exercises at 4:30 PM"
   ],
   "next_days_plans": [
     "2026-05-01: Lab meeting with Vansh at 11:00 AM",
@@ -33,20 +35,1281 @@
     "Refill water bottle before leaving",
     "Message Siddharth about tomorrow timeline"
   ],
-  "recent_turns": [],
-  "situation_hints": [],
-  "confirmed_outputs": [],
-  "loaded_summary": {},
-  "final_output": null,
-  "last_options": [],
-  "active_partner": {
-    "person_id": "unknown_partner",
-    "name": "unknown_partner",
-    "relation": "general"
+  "recent_turns": [
+    {
+      "partner": "Are you ready for the movie?",
+      "response": "Yes, movie at seven still works for me.",
+      "timestamp": "2026-05-03T15:42:47.913822+00:00"
+    },
+    {
+      "partner": "Tomorrow we have project rehearsal at 5:15 PM",
+      "response": "Got it, I noted that.",
+      "timestamp": "2026-05-03T15:42:47.971831+00:00"
+    },
+    {
+      "partner": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "response": "Yes, it is fine with me.",
+      "timestamp": "2026-05-03T19:46:04.823141+00:00"
+    },
+    {
+      "partner": "Do you remember our movie plan today?",
+      "response": "No, let us go some other time. Maybe tomorrow.",
+      "timestamp": "2026-05-03T19:46:04.883360+00:00"
+    },
+    {
+      "partner": "Are you ready for the movie?",
+      "response": "Yes, movie at seven still works for me.",
+      "timestamp": "2026-05-03T19:46:05.006845+00:00"
+    },
+    {
+      "partner": "Tomorrow we have project rehearsal at 5:15 PM",
+      "response": "Got it, I noted that.",
+      "timestamp": "2026-05-03T19:46:05.078941+00:00"
+    },
+    {
+      "partner": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "response": "Yes, it is fine with me.",
+      "timestamp": "2026-05-03T19:56:20.221604+00:00"
+    },
+    {
+      "partner": "Do you remember our movie plan today?",
+      "response": "No, let us go some other time. Maybe tomorrow.",
+      "timestamp": "2026-05-03T19:56:20.253486+00:00"
+    },
+    {
+      "partner": "Are you ready for the movie?",
+      "response": "Yes, movie at seven still works for me.",
+      "timestamp": "2026-05-03T19:56:20.328055+00:00"
+    },
+    {
+      "partner": "Tomorrow we have project rehearsal at 5:15 PM",
+      "response": "Got it, I noted that.",
+      "timestamp": "2026-05-03T19:56:20.367889+00:00"
+    },
+    {
+      "partner": "What do we have later today?",
+      "response": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "timestamp": "2026-05-03T20:06:30.052609+00:00"
+    },
+    {
+      "partner": "What snack do you want later?",
+      "response": "I want popcorn",
+      "timestamp": "2026-05-03T20:07:56.402607+00:00"
+    },
+    {
+      "partner": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "response": "Yes, it is fine with me.",
+      "timestamp": "2026-05-03T20:12:37.507027+00:00"
+    },
+    {
+      "partner": "Do you remember our movie plan today?",
+      "response": "No, let us go some other time. Maybe tomorrow.",
+      "timestamp": "2026-05-03T20:12:37.539418+00:00"
+    },
+    {
+      "partner": "Are you ready for the movie?",
+      "response": "Yes, movie at seven still works for me.",
+      "timestamp": "2026-05-03T20:12:37.622595+00:00"
+    },
+    {
+      "partner": "Tomorrow we have project rehearsal at 5:15 PM",
+      "response": "Got it, I noted that.",
+      "timestamp": "2026-05-03T20:12:37.664673+00:00"
+    },
+    {
+      "partner": "If you already take your medication,",
+      "response": "I am not sure if I already took it.",
+      "timestamp": "2026-05-03T20:14:28.531199+00:00"
+    },
+    {
+      "partner": "Do you remember our movie plan?",
+      "response": "No, I do not remember right now.",
+      "timestamp": "2026-05-03T20:16:02.871512+00:00"
+    },
+    {
+      "partner": "Do you remember our movie plan? Now?",
+      "response": "Yes, that works for me. I remember the movie is at 7:00 PM.",
+      "timestamp": "2026-05-03T20:16:57.729485+00:00"
+    },
+    {
+      "partner": "Uh, what plans do we have with her today?",
+      "response": "I remember the movie is at 7:00 PM, nothing today. Movie with Omer tomorrow at 7, okay.",
+      "timestamp": "2026-05-03T20:34:46.074886+00:00"
+    },
+    {
+      "partner": "Uh, what snacks do you like the most?",
+      "response": "I remember the movie is at 7:00 PM, nothing today. Movie with Omer tomorrow at 7, okay.",
+      "timestamp": "2026-05-03T20:35:42.765571+00:00"
+    },
+    {
+      "partner": "Uh, what snacks do you like the most?",
+      "response": "I love Popcorn, ll have those",
+      "timestamp": "2026-05-03T20:36:33.501751+00:00"
+    },
+    {
+      "partner": "Did you already take your medication?",
+      "response": "I am not sure if I already took it.",
+      "timestamp": "2026-05-03T20:38:42.547842+00:00"
+    },
+    {
+      "partner": "Hey. Do you remember our movie plan?",
+      "response": "No, I do not remember right now.",
+      "timestamp": "2026-05-03T20:39:59.062041+00:00"
+    },
+    {
+      "partner": "Hey. Do you remember our movie plan?",
+      "response": "Yes, movie at 7?",
+      "timestamp": "2026-05-03T20:43:24.937577+00:00"
+    }
+  ],
+  "situation_hints": [
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Tomorrow we have project rehearsal at 5:15 PM",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plans?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "You know we had plans for the movie at 7? Let's go tomorrow.",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan today?",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Are you ready for the movie?",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Tomorrow we have project rehearsal at 5:15 PM",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "You know we had plans for the movie at 7? Let's go tomorrow.",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan today?",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Are you ready for the movie?",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Tomorrow we have project rehearsal at 5:15 PM",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "You know we had plans for the movie at 7? Let's go tomorrow.",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan today?",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Are you ready for the movie?",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Tomorrow we have project rehearsal at 5:15 PM",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "What do we have later today?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "What snack do you want later?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "You know we had plans for the movie at 7? Let's go tomorrow.",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan today?",
+        "partner_type": "general",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Are you ready for the movie?",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Tomorrow we have project rehearsal at 5:15 PM",
+        "partner_type": "general",
+        "face_cue": "none"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "If you already take your medication,",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Do you remember our movie plan? Now?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Uh, what plans do we have with her today?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Personal",
+        "topic": "Uh, what snacks do you like the most?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Personal",
+        "topic": "Uh, what snacks do you like the most?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Did you already take your medication?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Hey. Do you remember our movie plan?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    },
+    {
+      "signature": {
+        "intent": "Contextual",
+        "topic": "Hey. Do you remember our movie plan?",
+        "partner_type": "friend",
+        "face_cue": "not_smile"
+      },
+      "preference": "short_calm",
+      "ttl": "session_only"
+    }
+  ],
+  "confirmed_outputs": [
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T13:44:31.001374+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T13:44:31.049482+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T13:44:31.112322+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T13:44:31.163920+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T13:52:26.326331+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T13:52:26.378428+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T13:52:26.446139+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T13:52:26.500776+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T13:58:16.915049+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T13:58:16.957942+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T13:58:17.017836+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T13:58:17.070306+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T14:27:26.245803+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T14:27:26.283073+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T14:27:26.343522+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T14:27:26.398778+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T14:28:32.687503+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T14:28:32.731889+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T14:28:32.793796+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T14:28:32.841406+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hi.",
+      "selected_text": "Hi, good to see you.",
+      "final_text": "Hi, good to see you.",
+      "confirmed_at": "2026-05-03T14:43:25.276159+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hi.",
+      "selected_text": "I remember Hi, good to see you, Hey! How are you.",
+      "final_text": "I remember Hi, good to see you, Hey! How are you.",
+      "confirmed_at": "2026-05-03T14:45:12.373163+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "What do I have later today?",
+      "selected_text": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "final_text": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "confirmed_at": "2026-05-03T14:46:39.387566+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T14:51:03.804916+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T14:51:03.832771+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T14:51:03.878425+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T14:51:03.917749+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T14:54:10.636376+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T14:54:10.672806+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T14:54:10.727437+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T14:54:10.776499+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T14:57:32.920598+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T14:57:32.948572+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T14:57:32.997643+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T14:57:33.038297+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T15:02:55.410701+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T15:02:55.441862+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T15:02:55.488060+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T15:02:55.522809+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hi.",
+      "selected_text": "Hi, good to see you.",
+      "final_text": "Hi, good to see you.",
+      "confirmed_at": "2026-05-03T15:09:12.433611+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hi.",
+      "selected_text": "I remember Hi, how are you?, Hi, good to see you.",
+      "final_text": "I remember Hi, how are you?, Hi, good to see you.",
+      "confirmed_at": "2026-05-03T15:11:43.247500+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "What do I have later today?",
+      "selected_text": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "final_text": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "confirmed_at": "2026-05-03T15:13:11.121668+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "What snacks do you want later?",
+      "selected_text": "Can we get popcorn?",
+      "final_text": "Can we get popcorn?",
+      "confirmed_at": "2026-05-03T15:14:47.894798+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T15:18:36.633902+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T15:18:36.678928+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T15:18:36.741107+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T15:18:36.787337+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T15:20:23.513049+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T15:20:23.543295+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T15:20:23.598250+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T15:20:23.637498+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Did you already take your medication?",
+      "selected_text": "I am not sure if I already took it.",
+      "final_text": "I am not sure if I already took it.",
+      "confirmed_at": "2026-05-03T15:22:10.906458+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T15:25:13.140509+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T15:25:13.172337+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T15:25:13.230930+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T15:25:13.269475+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan?",
+      "selected_text": "No, I do not remember right now.",
+      "final_text": "No, I do not remember right now.",
+      "confirmed_at": "2026-05-03T15:31:26.956426+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plans?",
+      "selected_text": "Yes, that works for me. I remember that is planned for 7:00 PM.",
+      "final_text": "Yes, that works for me. I remember that is planned for 7:00 PM.",
+      "confirmed_at": "2026-05-03T15:36:02.544423+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T15:42:47.789595+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T15:42:47.831771+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T15:42:47.913822+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T15:42:47.971831+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T19:46:04.823141+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T19:46:04.883360+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T19:46:05.006845+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T19:46:05.078941+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T19:56:20.221604+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T19:56:20.253486+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T19:56:20.328055+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T19:56:20.367889+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hi. How are you?",
+      "selected_text": "Hi!",
+      "final_text": "Hi!",
+      "confirmed_at": "2026-05-03T20:05:05.299415+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "What do we have later today?",
+      "selected_text": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "final_text": "I remember therapy is at 4:30 PM, You have CSE 635 check-in at 2:00 PM, and Therapy exercises at 4:30 PM.",
+      "confirmed_at": "2026-05-03T20:06:30.051509+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "What snack do you want later?",
+      "selected_text": "No, I do not want to right now.",
+      "final_text": "I want popcorn",
+      "confirmed_at": "2026-05-03T20:07:56.402607+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "You know we had plans for the movie at 7? Let's go tomorrow.",
+      "selected_text": "Yes, it is fine with me.",
+      "final_text": "Yes, it is fine with me.",
+      "confirmed_at": "2026-05-03T20:12:37.507027+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan today?",
+      "selected_text": "No, let us go some other time. 7:00 PM today.",
+      "final_text": "No, let us go some other time. Maybe tomorrow.",
+      "confirmed_at": "2026-05-03T20:12:37.539418+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Are you ready for the movie?",
+      "selected_text": "Yes, movie at seven still works for me.",
+      "final_text": "Yes, movie at seven still works for me.",
+      "confirmed_at": "2026-05-03T20:12:37.622595+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Tomorrow we have project rehearsal at 5:15 PM",
+      "selected_text": "Got it.",
+      "final_text": "Got it, I noted that.",
+      "confirmed_at": "2026-05-03T20:12:37.664673+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "If you already take your medication,",
+      "selected_text": "I am not sure if I already took it.",
+      "final_text": "I am not sure if I already took it.",
+      "confirmed_at": "2026-05-03T20:14:28.529963+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan?",
+      "selected_text": "No, I do not remember right now.",
+      "final_text": "No, I do not remember right now.",
+      "confirmed_at": "2026-05-03T20:16:02.871512+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Do you remember our movie plan? Now?",
+      "selected_text": "Yes, that works for me. I remember the movie is at 7:00 PM.",
+      "final_text": "Yes, that works for me. I remember the movie is at 7:00 PM.",
+      "confirmed_at": "2026-05-03T20:16:57.728472+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hi. How are you?",
+      "selected_text": "I remember I'm doing well, Hey! Good to see you.",
+      "final_text": "I remember I'm doing well, Hey! Good to see you.",
+      "confirmed_at": "2026-05-03T20:32:15.185721+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Uh, what plans do we have with her today?",
+      "selected_text": "I remember the movie is at 7:00 PM, nothing today. Movie with Omer tomorrow at 7, okay.",
+      "final_text": "I remember the movie is at 7:00 PM, nothing today. Movie with Omer tomorrow at 7, okay.",
+      "confirmed_at": "2026-05-03T20:34:46.074886+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Uh, what snacks do you like the most?",
+      "selected_text": "",
+      "final_text": "I remember the movie is at 7:00 PM, nothing today. Movie with Omer tomorrow at 7, okay.",
+      "confirmed_at": "2026-05-03T20:35:42.765571+00:00",
+      "router_label": "Personal"
+    },
+    {
+      "partner_text": "Uh, what snacks do you like the most?",
+      "selected_text": "",
+      "final_text": "I love Popcorn, ll have those",
+      "confirmed_at": "2026-05-03T20:36:33.501751+00:00",
+      "router_label": "Personal"
+    },
+    {
+      "partner_text": "Did you already take your medication?",
+      "selected_text": "I am not sure if I already took it.",
+      "final_text": "I am not sure if I already took it.",
+      "confirmed_at": "2026-05-03T20:38:42.547842+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hey. Do you remember our movie plan?",
+      "selected_text": "No, I do not remember right now.",
+      "final_text": "No, I do not remember right now.",
+      "confirmed_at": "2026-05-03T20:39:59.062041+00:00",
+      "router_label": "Contextual"
+    },
+    {
+      "partner_text": "Hey. Do you remember our movie plan?",
+      "selected_text": "Yes, that works for me. I remember Plan: Movie with Omer.",
+      "final_text": "Yes, movie at 7?",
+      "confirmed_at": "2026-05-03T20:43:24.937577+00:00",
+      "router_label": "Contextual"
+    }
+  ],
+  "loaded_summary": {
+    "ltm_keys": [
+      "age_range",
+      "assistive_setup",
+      "city_context",
+      "communication_needs",
+      "communication_style",
+      "conversation_boundaries",
+      "daily_routine_preferences",
+      "display_name",
+      "do_not_say",
+      "education_context",
+      "favorites",
+      "important_places",
+      "living_situation",
+      "ltm_update_policy",
+      "partner_style_preferences",
+      "people_and_relationships",
+      "people_topics",
+      "personality_traits",
+      "primary_language",
+      "relationships",
+      "response_buckets_preference",
+      "secondary_language",
+      "strengths",
+      "user_id"
+    ],
+    "stm_sections": [
+      "active_partner",
+      "active_session",
+      "confirmed_outputs",
+      "current_partner_context",
+      "current_topic_hints",
+      "date",
+      "final_output",
+      "last_generation_context",
+      "last_options",
+      "last_partner_text",
+      "loaded_summary",
+      "memory_update_last_note",
+      "next_days_plans",
+      "query_metrics_history",
+      "recent_turns",
+      "reminders",
+      "runtime_clock",
+      "situation_hints",
+      "today_plans"
+    ],
+    "pb_phrase_count": 216
   },
-  "query_metrics_history": [],
-  "memory_update_last_note": "",
-  "last_partner_text": "",
-  "last_generation_context": {},
-  "runtime_clock": ""
+  "final_output": "Yes, movie at 7?",
+  "last_options": [
+    "Yes, that works for me. I remember Plan: Movie with Omer.",
+    "No, I do not want to right now.",
+    "I am not sure yet. Can you give me one more detail?"
+  ],
+  "active_partner": {
+    "person_id": "omer",
+    "name": "Omer",
+    "relation": "friend"
+  },
+  "query_metrics_history": [
+    {
+      "query_id": "4067bfa2-ea41-4843-9814-d1a356b7d207",
+      "event_type": "normal",
+      "timestamp": "2026-05-03T20:38:23.963187+00:00",
+      "partner_text": "Did you already take your medication?",
+      "partner_detected": "Omer (friend)",
+      "latency_ms": 16661,
+      "groundedness_score": 0.0667,
+      "hallucination_flag": true,
+      "unsupported_claims_count": 3,
+      "retrieval_stats": {
+        "sources_used": [
+          "LTM"
+        ],
+        "chunks_used": 2,
+        "search_order": [
+          "LTM",
+          "PB",
+          "STM"
+        ],
+        "buckets_chosen": [
+          "medical",
+          "routine",
+          "family"
+        ]
+      },
+      "camera_used": true,
+      "face_summary": "neutral/low signal",
+      "edit_distance": 0.0,
+      "acceptance": true
+    },
+    {
+      "query_id": "8f5a4ebe-c285-46c2-8dad-dfaeafd1ee40",
+      "event_type": "normal",
+      "timestamp": "2026-05-03T20:39:24.524276+00:00",
+      "partner_text": "Hey. Do you remember our movie plan?",
+      "partner_detected": "Omer (friend)",
+      "latency_ms": 16028,
+      "groundedness_score": 0.1333,
+      "hallucination_flag": true,
+      "unsupported_claims_count": 2,
+      "retrieval_stats": {
+        "sources_used": [
+          "STM"
+        ],
+        "chunks_used": 2,
+        "search_order": [
+          "STM",
+          "LTM",
+          "PB"
+        ],
+        "buckets_chosen": [
+          "plans",
+          "routine"
+        ]
+      },
+      "camera_used": true,
+      "face_summary": "head shake high + hand Thumb_Down",
+      "edit_distance": 0.0,
+      "acceptance": true
+    },
+    {
+      "query_id": "fbeb5862-9e38-46e4-a1d3-ad1ed617f06a",
+      "event_type": "normal",
+      "timestamp": "2026-05-03T20:42:53.476570+00:00",
+      "partner_text": "Hey. Do you remember our movie plan?",
+      "partner_detected": "Omer (friend)",
+      "latency_ms": 12016,
+      "groundedness_score": 0.1905,
+      "hallucination_flag": true,
+      "unsupported_claims_count": 2,
+      "retrieval_stats": {
+        "sources_used": [
+          "STM"
+        ],
+        "chunks_used": 2,
+        "search_order": [
+          "STM",
+          "LTM",
+          "PB"
+        ],
+        "buckets_chosen": [
+          "plans",
+          "routine",
+          "clarify_calm"
+        ]
+      },
+      "camera_used": true,
+      "face_summary": "head nod high + hand Thumb_Up",
+      "edit_distance": null,
+      "acceptance": null
+    }
+  ],
+  "memory_update_last_note": "No new partner memory item detected to save.",
+  "last_partner_text": "Hey. Do you remember our movie plan?",
+  "last_generation_context": {
+    "query_id": "fbeb5862-9e38-46e4-a1d3-ad1ed617f06a",
+    "router_label": "Contextual",
+    "sources_searched_in_order": [
+      "STM"
+    ],
+    "search_order": [
+      "STM",
+      "LTM",
+      "PB"
+    ],
+    "evidence_used": [
+      {
+        "pool": "STM",
+        "bucket_id": "plans",
+        "text": "Plan: Movie with Omer",
+        "score": 1.0714
+      },
+      {
+        "pool": "STM",
+        "bucket_id": "plans",
+        "text": "Date: Tomorrow",
+        "score": 1.0052
+      }
+    ],
+    "options": [
+      "Yes, that works for me. I remember Plan: Movie with Omer.",
+      "No, I do not want to right now.",
+      "I am not sure yet. Can you give me one more detail?"
+    ],
+    "latency_ms": 12016,
+    "camera_used": true,
+    "face_signals": {
+      "smile_score": 0.13578009816151576,
+      "confused_prob": 0.46678762663974877,
+      "neutral_prob": 0.8141850569618473,
+      "negative_prob": 0.12,
+      "nod_score": 0.74,
+      "shake_score": 0.12,
+      "hand_gesture_label": "Thumb_Up",
+      "hand_gesture_score": 0.6983246626165821,
+      "face_detected": true,
+      "hand_detected": true,
+      "handedness": "Right",
+      "smile_prob": 0.13578009816151576
+    },
+    "template_trace": "",
+    "query_metrics": {
+      "query_id": "fbeb5862-9e38-46e4-a1d3-ad1ed617f06a",
+      "event_type": "normal",
+      "timestamp": "2026-05-03T20:42:53.476570+00:00",
+      "partner_text": "Hey. Do you remember our movie plan?",
+      "partner_detected": "Omer (friend)",
+      "latency_ms": 12016,
+      "groundedness_score": 0.1905,
+      "hallucination_flag": true,
+      "unsupported_claims_count": 2,
+      "retrieval_stats": {
+        "sources_used": [
+          "STM"
+        ],
+        "chunks_used": 2,
+        "search_order": [
+          "STM",
+          "LTM",
+          "PB"
+        ],
+        "buckets_chosen": [
+          "plans",
+          "routine",
+          "clarify_calm"
+        ]
+      },
+      "camera_used": true,
+      "face_summary": "head nod high + hand Thumb_Up",
+      "edit_distance": null,
+      "acceptance": null
+    }
+  },
+  "runtime_clock": "2026-05-03T20:42:41.429Z"
 }

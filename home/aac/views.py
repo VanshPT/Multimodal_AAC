@@ -75,6 +75,7 @@ def speak_mode_api(request):
             session_id=payload.get("session_id", ""),
             camera_on=bool(payload.get("camera_on", False)),
             face_signals=payload.get("face_signals"),
+            partner_name=payload.get("partner_name", ""),
             client_now=payload.get("client_now", ""),
         )
     except (ValueError, MemoryStoreError) as error:

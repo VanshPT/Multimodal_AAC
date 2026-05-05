@@ -1,8 +1,10 @@
 from django.test import SimpleTestCase
 
 from home.aac.memory.store import memory_store
+from home.aac.llm import gemini_client
 from home.aac.pipelines.nodes import _is_binary_prompt, _is_plan_change_prompt, candidate_generator_node, face_cue_node
 from home.aac.pipelines.normal_pipeline import run_normal_pipeline
+from home.aac.pipelines.speak_pipeline import run_speak_pipeline
 from home.aac.service import _find_matching_plan
 from home.aac.types import RetrievalEvidence
 from home.aac.service import confirm_response, start_session
@@ -346,3 +348,94 @@ class MemoryUpdateTests(SimpleTestCase):
         self.assertIn(response["memory_update_actions"]["partner_memory"]["action"], {"rescheduled_to_future", "agreed_future_plan"})
         state = memory_store.get_session(session_id)
         self.assertTrue(any("tomorrow: movie with omer at 7:00 pm" in item.lower() for item in state.stm.get("next_days_plans", [])))
+
+    def test_speak_pipeline_marks_llm_enabled_when_refiner_succeeds(self):
+        session = start_session("demo_user")
+        state = memory_store.get_session(session["session_id"])
+        original_enabled = gemini_client.enabled
+        original_method = gemini_client.generate_speak_suggestions
+        try:
+            gemini_client.enabled = True
+
+            def fake_generate(grouped, style, face_summary):
+                return grouped, "gemini-test-model", ""
+
+            gemini_client.generate_speak_suggestions = fake_generate
+            result = run_speak_pipeline(
+                state=state,
+                camera_on=False,
+                provided_face_signals=None,
+            )
+            self.assertTrue(result.debug_info.llm_enabled)
+            self.assertEqual(result.debug_info.model_used, "gemini-test-model")
+            self.assertIn("SpeakLLMRefinerNode", result.debug_info.node_trace)
+        finally:
+            gemini_client.enabled = original_enabled
+            gemini_client.generate_speak_suggestions = original_method
+
+    def test_medication_status_query_stays_uncertain_and_never_affirmative(self):
+        session = start_session("demo_user")
+        state = memory_store.get_session(session["session_id"])
+        state.stm["today_plans"] = [
+            "Take evening medication at 8:30 PM",
+            "Movie with Omer at 7:00 PM at Regal North screen 6",
+        ]
+        result = run_normal_pipeline(
+            state=state,
+            partner_text="Did you already take your medication?",
+            camera_on=True,
+            provided_face_signals={"face_detected": True, "confused_prob": 0.1, "negative_prob": 0.05, "nod_score": 0.0, "shake_score": 0.0},
+            pb_enabled=True,
+        )
+        joined = " ".join(result.options).lower()
+        self.assertIn("not sure", joined)
+        self.assertTrue("8:30" in joined or "scheduled" in joined or "planned" in joined)
+        self.assertNotIn("works for me", joined)
+        self.assertNotIn("yes, that works for me", joined)
+        self.assertNotIn("omer", joined)
+
+    def test_medication_status_query_ignores_llm_candidate_rewrite(self):
+        session = start_session("demo_user")
+        state = memory_store.get_session(session["session_id"])
+        state.stm["today_plans"] = ["Take evening medication at 8:30 PM"]
+        original_enabled = gemini_client.enabled
+        original_generate = gemini_client.generate_candidates
+        original_classify = gemini_client.classify_router
+        original_refine = gemini_client.refine_evidence
+        try:
+            gemini_client.enabled = True
+            gemini_client.classify_router = lambda text: ("Personal", "fake-router", "")
+            gemini_client.refine_evidence = lambda text, evidence: (["bad llm rewrite"], "fake-refiner", "")
+            gemini_client.generate_candidates = lambda **kwargs: (["Yes, that works for me.", "I remember Omer.", "Done."], "fake-generator", "")
+            result = run_normal_pipeline(
+                state=state,
+                partner_text="Did you already take your medication?",
+                camera_on=True,
+                provided_face_signals={"face_detected": True, "confused_prob": 0.0, "negative_prob": 0.0, "nod_score": 0.0, "shake_score": 0.0},
+                pb_enabled=True,
+            )
+            joined = " ".join(result.options).lower()
+            self.assertIn("not sure", joined)
+            self.assertNotIn("works for me", joined)
+            self.assertNotIn("omer", joined)
+        finally:
+            gemini_client.enabled = original_enabled
+            gemini_client.generate_candidates = original_generate
+            gemini_client.classify_router = original_classify
+            gemini_client.refine_evidence = original_refine
+
+    def test_hi_how_are_you_is_treated_as_greeting_and_not_partner_profile(self):
+        session = start_session("demo_user")
+        state = memory_store.get_session(session["session_id"])
+        state.stm["active_partner"] = {"person_id": "omer", "name": "Omer", "relation": "friend"}
+        result = run_normal_pipeline(
+            state=state,
+            partner_text="Hi. How are you?",
+            camera_on=True,
+            provided_face_signals={"face_detected": True, "confused_prob": 0.6, "negative_prob": 0.05, "nod_score": 0.0, "shake_score": 0.0, "hand_gesture_label": "Open_Palm", "hand_gesture_score": 0.9},
+            pb_enabled=True,
+        )
+        joined = " ".join(result.options).lower()
+        self.assertNotIn("partner is", joined)
+        self.assertNotIn("omer prefers", joined)
+        self.assertTrue(any("hi" in option.lower() or "hey" in option.lower() or "hello" in option.lower() for option in result.options))

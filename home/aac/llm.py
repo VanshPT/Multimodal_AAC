@@ -227,6 +227,44 @@ class GeminiClient:
         except Exception:
             return None, model, "Candidate JSON parse failed"
 
+    def generate_speak_suggestions(
+        self,
+        grouped: Dict[str, List[str]],
+        style: Dict,
+        face_summary: str,
+    ) -> Tuple[Optional[Dict[str, List[str]]], str, str]:
+        if not grouped:
+            return {}, "", ""
+        prompt = (
+            "You are refining AAC proactive suggestions.\n"
+            "Keep the same top-level groups and keep each group's item count exactly the same.\n"
+            "Rewrite items to sound natural, concise, and varied, while staying grounded in the provided content.\n"
+            "Do not invent new plans or facts.\n"
+            "Return strict JSON only with the same group keys mapped to arrays of strings.\n"
+            f"Face cue: {face_summary}\n"
+            f"Style preferences: {json.dumps(style)}\n"
+            f"Grouped suggestions: {json.dumps(grouped)}\n"
+        )
+        text, model, error = self._generate_text(prompt)
+        if not text:
+            return None, model, error
+        try:
+            start = text.find("{")
+            end = text.rfind("}")
+            payload = json.loads(text[start : end + 1]) if start != -1 and end != -1 else json.loads(text)
+            normalized: Dict[str, List[str]] = {}
+            for key, original_items in grouped.items():
+                candidate_items = payload.get(key, [])
+                if not isinstance(candidate_items, list):
+                    return None, model, f"Speak suggestions for group '{key}' were not a list"
+                cleaned = [str(item).strip() for item in candidate_items if str(item).strip()]
+                if len(cleaned) != len(original_items):
+                    return None, model, f"Speak suggestions count changed for group '{key}'"
+                normalized[key] = cleaned
+            return normalized, model, ""
+        except Exception:
+            return None, model, "Speak suggestion JSON parse failed"
+
     def health_ping(self) -> Dict[str, object]:
         started = time.perf_counter()
         text, model, error = self._generate_text("ping")

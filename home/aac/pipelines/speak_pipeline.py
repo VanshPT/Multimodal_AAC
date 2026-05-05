@@ -1,5 +1,6 @@
 import time
 
+from home.aac.llm import gemini_client
 from home.aac.pipelines.nodes import face_cue_node, face_summary, speak_planner_node
 from home.aac.types import DebugInfo, FaceSignals, SessionState, SpeakResult
 
@@ -31,10 +32,23 @@ def run_speak_pipeline(
 ) -> SpeakResult:
     node_trace = []
     started = time.perf_counter()
+    llm_error = ""
+    model_used = ""
+    llm_enabled = False
     signals = face_cue_node(camera_on=camera_on, provided_face_signals=provided_face_signals)
     node_trace.append("FaceCueNode")
     grouped = _normalize_suggestion_count(speak_planner_node(state=state, face_signals=signals))
     node_trace.append("SpeakPlannerNode")
+    if gemini_client.enabled:
+        refined_grouped, model_used, llm_error = gemini_client.generate_speak_suggestions(
+            grouped=grouped,
+            style=state.ltm.get("communication_style", {}),
+            face_summary=face_summary(signals),
+        )
+        if refined_grouped:
+            grouped = _normalize_suggestion_count(refined_grouped)
+            llm_enabled = True
+            node_trace.append("SpeakLLMRefinerNode")
     total = sum(len(items) for items in grouped.values())
     if not 20 <= total <= 30:
         raise ValueError("Speak mode must produce between 20 and 30 suggestions.")
@@ -53,10 +67,13 @@ def run_speak_pipeline(
         groundedness_score=1.0,
         hallucination_flag=False,
         evidence_size=sum(len(item) for group in grouped.values() for item in group),
-        llm_enabled=False,
-        model_used="",
-        llm_error="",
+        llm_enabled=llm_enabled,
+        model_used=model_used,
+        llm_error=llm_error if not llm_enabled else "",
         node_trace=node_trace,
-        notes=[f"Generated {sum(len(items) for items in grouped.values())} suggestions"],
+        notes=[
+            f"Generated {sum(len(items) for items in grouped.values())} suggestions",
+            "LLM refinement applied for speak mode." if llm_enabled else "Deterministic speak-mode suggestions used.",
+        ],
     )
     return SpeakResult(grouped_suggestions=grouped, debug_info=debug, raw={"signals": signals})

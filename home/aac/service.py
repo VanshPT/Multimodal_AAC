@@ -160,9 +160,12 @@ def handle_speak_mode(
     session_id: str,
     camera_on: bool,
     face_signals: Optional[Dict[str, float]],
+    partner_name: str = "",
     client_now: str = "",
 ) -> Dict[str, Any]:
     state = _session_or_raise(session_id)
+    partner_context = _resolve_partner(state=state, partner_name=partner_name)
+    state.stm["active_partner"] = partner_context
     if client_now:
         state.stm["runtime_clock"] = client_now
     else:

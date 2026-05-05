@@ -4,6 +4,7 @@ from typing import Dict, List
 from home.aac.evaluation.metrics import groundedness_score
 from home.aac.llm import gemini_client
 from home.aac.pipelines.nodes import (
+    _is_medication_status_query,
     bucket_selector_node,
     candidate_generator_node,
     enforce_memory_signature,
@@ -42,6 +43,7 @@ def run_normal_pipeline(
     generator_model = ""
     llm_label = None
     greeting_query = is_short_greeting(partner_text)
+    medication_query = _is_medication_status_query(partner_text)
     if gemini_client.enabled:
         llm_label, router_model, router_error = gemini_client.classify_router(partner_text)
         if not llm_label and router_error:
@@ -117,9 +119,11 @@ def run_normal_pipeline(
             pb_exemplars=pb_exemplars,
             face_summary=face_summary(signals),
         )
-        deterministic_query = is_short_greeting(partner_text) or _is_schedule_summary_query(partner_text)
+        deterministic_query = is_short_greeting(partner_text) or _is_schedule_summary_query(partner_text) or medication_query
         if llm_options and not has_strong_tone_signal(signals) and not deterministic_query:
             options = llm_options + [options[-1]]
+        elif llm_options and medication_query:
+            notes.append("LLM ran, but deterministic safety output was kept for medication-status query.")
         elif llm_options and (has_strong_tone_signal(signals) or deterministic_query):
             notes.append("Deterministic tone override kept due to strong face/hand cue.")
         elif generator_error:

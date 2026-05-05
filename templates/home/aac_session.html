@@ -130,6 +130,7 @@
                 </select>
                 <label><input type="checkbox" id="pbToggle" checked> PB Enabled</label>
                 <button id="speakBtn" class="speak-btn" disabled>SPEAK</button>
+                <button id="speakAacBtn" disabled>SPEAK AAC</button>
                 <span id="voiceStatusChip" class="voice-chip" aria-live="polite">
                     <span id="voicePulse" class="voice-pulse"></span>
                     <span id="voiceStatusText">Listening...</span>
@@ -224,18 +225,23 @@ let latestFaceSignals = null;
 let stream = null;
 let faceLandmarker = null;
 let gestureRecognizer = null;
+let handLandmarker = null;
 let faceLandmarkerReady = false;
 let faceLandmarkerFailed = false;
 let gestureRecognizerReady = false;
 let gestureRecognizerFailed = false;
+let handLandmarkerReady = false;
+let handLandmarkerFailed = false;
 let faceInitError = "";
 let gestureInitError = "";
+let handInitError = "";
 let faceEngine = "none";
 let facePollingTimer = null;
 let headHistory = [];
 let handHistory = [];
 let motionLatch = { nodUntil: 0, shakeUntil: 0 };
 let recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: 0 };
+let lastStableHandSignal = { label: "", score: 0, handedness: "", updatedAt: 0 };
 let lastSubmittedSignals = null;
 let lastQueryId = "";
 const transcript = [];
@@ -248,6 +254,7 @@ let livekitAudioNodes = [];
 let voiceCaptureActive = false;
 let voiceFeatureActivated = false;
 let currentVoiceTurnId = "";
+let postVoiceCueCapture = null;
 
 function localNowIso() {
     return new Date().toISOString();
@@ -282,7 +289,7 @@ function smoothFaceSignals(raw) {
         return first;
     }
     const alpha = 0.65;
-    const motionAlpha = 0.45;
+    const motionAlpha = 0.18;
     const previousGesture = latestFaceSignals.hand_gesture_label || "";
     const previousGestureScore = latestFaceSignals.hand_gesture_score ?? 0;
     const currentGesture = raw.hand_gesture_label || "";
@@ -391,17 +398,31 @@ function buildNeutralSignalBaseline(overrides = {}) {
 
 function updateRecentSignalPeaks(signals) {
     const nowMs = Date.now();
-    if (!recentSignalPeaks.updatedAt || nowMs - recentSignalPeaks.updatedAt > 1800) {
+    if (!recentSignalPeaks.updatedAt || nowMs - recentSignalPeaks.updatedAt > 2200) {
         recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: nowMs };
     }
-    recentSignalPeaks.nod_score = Math.max(recentSignalPeaks.nod_score || 0, signals?.nod_score || 0);
-    recentSignalPeaks.shake_score = Math.max(recentSignalPeaks.shake_score || 0, signals?.shake_score || 0);
-    recentSignalPeaks.confused_prob = Math.max(recentSignalPeaks.confused_prob || 0, signals?.confused_prob || 0);
-    recentSignalPeaks.negative_prob = Math.max(recentSignalPeaks.negative_prob || 0, signals?.negative_prob || 0);
+    const elapsed = Math.max(0, nowMs - (recentSignalPeaks.updatedAt || nowMs));
+    const decay = Math.pow(0.42, elapsed / 900);
+    recentSignalPeaks.nod_score = Math.max((recentSignalPeaks.nod_score || 0) * decay, signals?.nod_score || 0);
+    recentSignalPeaks.shake_score = Math.max((recentSignalPeaks.shake_score || 0) * decay, signals?.shake_score || 0);
+    recentSignalPeaks.confused_prob = Math.max((recentSignalPeaks.confused_prob || 0) * decay, signals?.confused_prob || 0);
+    recentSignalPeaks.negative_prob = Math.max((recentSignalPeaks.negative_prob || 0) * decay, signals?.negative_prob || 0);
     if ((signals?.hand_gesture_label || "") && (signals?.hand_gesture_score || 0) >= 0.45) {
         recentSignalPeaks.hand_gesture_label = signals?.hand_gesture_label || "";
         recentSignalPeaks.hand_gesture_score = signals?.hand_gesture_score || 0;
         recentSignalPeaks.hand_updated_at = nowMs;
+        lastStableHandSignal = {
+            label: signals?.hand_gesture_label || "",
+            score: signals?.hand_gesture_score || 0,
+            handedness: signals?.handedness || "",
+            updatedAt: nowMs,
+        };
+    } else {
+        recentSignalPeaks.hand_gesture_score = (recentSignalPeaks.hand_gesture_score || 0) * decay;
+        if ((recentSignalPeaks.hand_gesture_score || 0) < 0.28 || (recentSignalPeaks.hand_updated_at && nowMs - recentSignalPeaks.hand_updated_at > 3600)) {
+            recentSignalPeaks.hand_gesture_label = "";
+            recentSignalPeaks.hand_gesture_score = 0;
+        }
     }
     recentSignalPeaks.updatedAt = nowMs;
 }
@@ -415,8 +436,9 @@ function buildRequestSignals() {
         const current = currentValue ?? 0;
         const peak = peakValue ?? 0;
         if (peak < 0.58) return Math.max(current, peak);
-        if (current >= 0.52) return Math.max(current, peak);
-        if (current >= 0.35 && Math.abs(peak - current) <= 0.22) return Math.max(current, peak);
+        if (current < 0.18) return current;
+        if (current >= 0.5) return Math.max(current, peak);
+        if (current >= 0.3 && Math.abs(peak - current) <= 0.12) return Math.max(current, peak);
         return current;
     };
     const blendEmotionPeak = (currentValue, peakValue) => {
@@ -433,21 +455,153 @@ function buildRequestSignals() {
         snapshot.confused_prob = blendEmotionPeak(snapshot.confused_prob, recentSignalPeaks.confused_prob || 0);
         snapshot.negative_prob = blendEmotionPeak(snapshot.negative_prob, recentSignalPeaks.negative_prob || 0);
         const currentHandIsStable = Boolean((snapshot.hand_gesture_label || "") && (snapshot.hand_gesture_score || 0) >= 0.45);
-        const recentHandIsFresh = recentSignalPeaks.hand_updated_at && nowMs - recentSignalPeaks.hand_updated_at <= 1400;
-        if (!currentHandIsStable && recentHandIsFresh && (recentSignalPeaks.hand_gesture_score || 0) >= 0.45) {
+        const recentHandIsFresh = recentSignalPeaks.hand_updated_at && nowMs - recentSignalPeaks.hand_updated_at <= 3600;
+        if ((!currentHandIsStable || (snapshot.hand_gesture_score || 0) < 0.55) && recentHandIsFresh && (recentSignalPeaks.hand_gesture_score || 0) >= 0.42) {
             snapshot.hand_gesture_label = recentSignalPeaks.hand_gesture_label || "";
             snapshot.hand_gesture_score = recentSignalPeaks.hand_gesture_score || 0;
             snapshot.hand_detected = Boolean(snapshot.hand_gesture_label);
         }
+        const stableHandIsFresh = lastStableHandSignal.updatedAt && nowMs - lastStableHandSignal.updatedAt <= 7000;
+        if ((!snapshot.hand_gesture_label || (snapshot.hand_gesture_score || 0) < 0.5) && stableHandIsFresh && (lastStableHandSignal.score || 0) >= 0.5) {
+            snapshot.hand_gesture_label = lastStableHandSignal.label || "";
+            snapshot.hand_gesture_score = lastStableHandSignal.score || 0;
+            snapshot.hand_detected = Boolean(snapshot.hand_gesture_label);
+            snapshot.handedness = lastStableHandSignal.handedness || snapshot.handedness || "";
+        }
+    }
+    if ((snapshot.hand_gesture_label || "") && (snapshot.hand_gesture_score || 0) >= 0.5) {
+        if (snapshot.hand_gesture_label === "Thumb_Up") {
+            snapshot.nod_score = Math.max(snapshot.nod_score || 0, 0.74);
+            snapshot.shake_score = Math.min(snapshot.shake_score || 0, 0.12);
+            snapshot.negative_prob = Math.min(snapshot.negative_prob || 0, 0.12);
+        } else if (snapshot.hand_gesture_label === "Thumb_Down") {
+            snapshot.shake_score = Math.max(snapshot.shake_score || 0, 0.74);
+            snapshot.nod_score = Math.min(snapshot.nod_score || 0, 0.12);
+            snapshot.smile_score = Math.min(snapshot.smile_score || 0, 0.18);
+            snapshot.negative_prob = Math.max(snapshot.negative_prob || 0, 0.5);
+        } else if (snapshot.hand_gesture_label === "Open_Palm") {
+            snapshot.confused_prob = Math.max(snapshot.confused_prob || 0, 0.58);
+            snapshot.nod_score = Math.min(snapshot.nod_score || 0, 0.18);
+            snapshot.shake_score = Math.min(snapshot.shake_score || 0, 0.18);
+        }
     }
     return snapshot;
+}
+
+function startCueCaptureWindow(delayMs = 0, durationMs = 4000) {
+    const nowMs = Date.now();
+    postVoiceCueCapture = {
+        collectFrom: nowMs + delayMs,
+        collectUntil: nowMs + delayMs + durationMs,
+        maxSmile: 0,
+        maxConfused: 0,
+        maxNegative: 0,
+        nodStrongFrames: 0,
+        shakeStrongFrames: 0,
+        maxNod: 0,
+        maxShake: 0,
+        handVotes: {},
+        handBestScores: {},
+        handHandedness: {},
+    };
+}
+
+function startPostVoiceCueCapture() {
+    startCueCaptureWindow(1000, 4000);
+}
+
+function recordPostVoiceCueSample(signals, nowMs) {
+    if (!postVoiceCueCapture || !signals) return;
+    if (nowMs < postVoiceCueCapture.collectFrom || nowMs > postVoiceCueCapture.collectUntil) return;
+    postVoiceCueCapture.maxSmile = Math.max(postVoiceCueCapture.maxSmile, signals.smile_score ?? signals.smile_prob ?? 0);
+    postVoiceCueCapture.maxConfused = Math.max(postVoiceCueCapture.maxConfused, signals.confused_prob ?? 0);
+    postVoiceCueCapture.maxNegative = Math.max(postVoiceCueCapture.maxNegative, signals.negative_prob ?? 0);
+    if ((signals.nod_score ?? 0) >= 0.68) {
+        postVoiceCueCapture.nodStrongFrames += 1;
+        postVoiceCueCapture.maxNod = Math.max(postVoiceCueCapture.maxNod, signals.nod_score ?? 0);
+    }
+    if ((signals.shake_score ?? 0) >= 0.68) {
+        postVoiceCueCapture.shakeStrongFrames += 1;
+        postVoiceCueCapture.maxShake = Math.max(postVoiceCueCapture.maxShake, signals.shake_score ?? 0);
+    }
+    const label = signals.hand_gesture_label || "";
+    const score = signals.hand_gesture_score || 0;
+    if (label && score >= 0.42) {
+        postVoiceCueCapture.handVotes[label] = (postVoiceCueCapture.handVotes[label] || 0) + 1;
+        postVoiceCueCapture.handBestScores[label] = Math.max(postVoiceCueCapture.handBestScores[label] || 0, score);
+        if (signals.handedness) {
+            postVoiceCueCapture.handHandedness[label] = signals.handedness;
+        }
+    }
+}
+
+async function waitForPostVoiceCueCaptureWindow() {
+    if (!postVoiceCueCapture) return;
+    setVoiceUiState("processing", "Reading facial cues...");
+    while (Date.now() < postVoiceCueCapture.collectUntil) {
+        if (document.getElementById("cameraToggle").checked) {
+            try {
+                await detectFaceSignals();
+            } catch (error) {
+                console.debug("cue window detect skipped", error);
+            }
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 170));
+    }
+}
+
+function finalizePostVoiceCueSignals(fallbackSignals) {
+    const capture = postVoiceCueCapture;
+    postVoiceCueCapture = null;
+    if (!capture) {
+        return fallbackSignals || buildRequestSignals() || latestFaceSignals;
+    }
+    const base = fallbackSignals ? JSON.parse(JSON.stringify(fallbackSignals)) : buildNeutralSignalBaseline({ face_detected: true });
+    base.nod_score = capture.nodStrongFrames >= 2 ? capture.maxNod : 0;
+    base.shake_score = capture.shakeStrongFrames >= 2 ? capture.maxShake : 0;
+    base.smile_score = Math.max(base.smile_score ?? base.smile_prob ?? 0, capture.maxSmile);
+    base.smile_prob = base.smile_score;
+    base.confused_prob = Math.max(base.confused_prob ?? 0, capture.maxConfused);
+    base.negative_prob = Math.max(base.negative_prob ?? 0, capture.maxNegative);
+    let bestLabel = "";
+    let bestVotes = 0;
+    let bestScore = 0;
+    Object.keys(capture.handVotes).forEach((label) => {
+        const votes = capture.handVotes[label] || 0;
+        const score = capture.handBestScores[label] || 0;
+        if (votes > bestVotes || (votes === bestVotes && score > bestScore)) {
+            bestLabel = label;
+            bestVotes = votes;
+            bestScore = score;
+        }
+    });
+    if (bestLabel && (bestVotes >= 2 || bestScore >= 0.72)) {
+        base.hand_gesture_label = bestLabel;
+        base.hand_gesture_score = bestScore;
+        base.hand_detected = true;
+        base.handedness = capture.handHandedness[bestLabel] || base.handedness || "";
+    }
+    if (base.hand_gesture_label === "Thumb_Up") {
+        base.nod_score = Math.max(base.nod_score ?? 0, 0.74);
+        base.shake_score = Math.min(base.shake_score ?? 0, 0.12);
+        base.negative_prob = Math.min(base.negative_prob ?? 0, 0.12);
+    } else if (base.hand_gesture_label === "Thumb_Down") {
+        base.shake_score = Math.max(base.shake_score ?? 0, 0.74);
+        base.nod_score = Math.min(base.nod_score ?? 0, 0.12);
+        base.negative_prob = Math.max(base.negative_prob ?? 0, 0.5);
+    } else if (base.hand_gesture_label === "Open_Palm") {
+        base.confused_prob = Math.max(base.confused_prob ?? 0, 0.62);
+        base.nod_score = Math.min(base.nod_score ?? 0, 0.18);
+        base.shake_score = Math.min(base.shake_score ?? 0, 0.18);
+    }
+    return base;
 }
 
 function stabilizeGestureLabel(label, score, handedness, nowMs) {
     if (label && label !== "None" && score >= 0.45) {
         handHistory.push({ label, score, handedness, t: nowMs });
     }
-    handHistory = handHistory.filter((item) => nowMs - item.t <= 1600);
+    handHistory = handHistory.filter((item) => nowMs - item.t <= 3600);
     const grouped = new Map();
     handHistory.forEach((item) => {
         const bucket = grouped.get(item.label) || { count: 0, totalScore: 0, handedness: item.handedness };
@@ -469,8 +623,11 @@ function stabilizeGestureLabel(label, score, handedness, nowMs) {
             bestHandedness = bucket.handedness;
         }
     });
-    if (bestLabel && (bestCount >= 2 || bestAvg >= 0.78)) {
+    if (bestLabel && (bestCount >= 2 || bestAvg >= 0.62)) {
         return { hand_gesture_label: bestLabel, hand_gesture_score: clamp01(bestAvg), hand_detected: true, handedness: bestHandedness };
+    }
+    if (label && label !== "None" && score >= 0.58) {
+        return { hand_gesture_label: label, hand_gesture_score: clamp01(score), hand_detected: true, handedness: handedness || "" };
     }
     if (latestFaceSignals?.hand_gesture_label && (latestFaceSignals.hand_gesture_score ?? 0) > 0.45) {
         return {
@@ -480,7 +637,105 @@ function stabilizeGestureLabel(label, score, handedness, nowMs) {
             handedness: latestFaceSignals.handedness || "",
         };
     }
+    if (lastStableHandSignal.label && (lastStableHandSignal.score || 0) >= 0.5 && Date.now() - (lastStableHandSignal.updatedAt || 0) <= 7000) {
+        return {
+            hand_gesture_label: lastStableHandSignal.label,
+            hand_gesture_score: clamp01(lastStableHandSignal.score),
+            hand_detected: true,
+            handedness: lastStableHandSignal.handedness || "",
+        };
+    }
     return { hand_gesture_label: "", hand_gesture_score: 0, hand_detected: false, handedness: "" };
+}
+
+function fingerExtended(landmarks, tipIdx, pipIdx, mcpIdx) {
+    const tip = landmarks?.[tipIdx];
+    const pip = landmarks?.[pipIdx];
+    const mcp = landmarks?.[mcpIdx];
+    if (!tip || !pip || !mcp) return false;
+    return tip.y < pip.y && pip.y < mcp.y;
+}
+
+function fingerCurled(landmarks, tipIdx, pipIdx) {
+    const tip = landmarks?.[tipIdx];
+    const pip = landmarks?.[pipIdx];
+    if (!tip || !pip) return false;
+    return tip.y > pip.y;
+}
+
+function distance2D(a, b) {
+    if (!a || !b) return 0;
+    const dx = (a.x || 0) - (b.x || 0);
+    const dy = (a.y || 0) - (b.y || 0);
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function inferGestureFromLandmarks(landmarks) {
+    if (!Array.isArray(landmarks) || landmarks.length < 21) {
+        return { label: "", score: 0 };
+    }
+    const wrist = landmarks[0];
+    const thumbTip = landmarks[4];
+    const thumbIp = landmarks[3];
+    const thumbMcp = landmarks[2];
+    const indexTip = landmarks[8];
+    const indexPip = landmarks[6];
+    const indexMcp = landmarks[5];
+    const middleTip = landmarks[12];
+    const middlePip = landmarks[10];
+    const middleMcp = landmarks[9];
+    const ringTip = landmarks[16];
+    const ringPip = landmarks[14];
+    const ringMcp = landmarks[13];
+    const pinkyTip = landmarks[20];
+    const pinkyPip = landmarks[18];
+    const pinkyMcp = landmarks[17];
+    if (!wrist || !thumbTip || !thumbIp || !thumbMcp || !indexTip || !indexPip || !indexMcp || !middleTip || !middlePip || !middleMcp || !ringTip || !ringPip || !ringMcp || !pinkyTip || !pinkyPip || !pinkyMcp) {
+        return { label: "", score: 0 };
+    }
+
+    const otherCurledCount = [
+        fingerCurled(landmarks, 8, 6),
+        fingerCurled(landmarks, 12, 10),
+        fingerCurled(landmarks, 16, 14),
+        fingerCurled(landmarks, 20, 18),
+    ].filter(Boolean).length;
+    const otherExtendedCount = [
+        fingerExtended(landmarks, 8, 6, 5),
+        fingerExtended(landmarks, 12, 10, 9),
+        fingerExtended(landmarks, 16, 14, 13),
+        fingerExtended(landmarks, 20, 18, 17),
+    ].filter(Boolean).length;
+
+    const curledByReachCount = [
+        distance2D(indexTip, wrist) < distance2D(indexMcp, wrist) * 1.15,
+        distance2D(middleTip, wrist) < distance2D(middleMcp, wrist) * 1.15,
+        distance2D(ringTip, wrist) < distance2D(ringMcp, wrist) * 1.15,
+        distance2D(pinkyTip, wrist) < distance2D(pinkyMcp, wrist) * 1.15,
+    ].filter(Boolean).length;
+    const foldedCount = Math.max(otherCurledCount, curledByReachCount);
+    const thumbLift = thumbIp.y - thumbTip.y;
+    const thumbDrop = thumbTip.y - thumbIp.y;
+    const thumbReach = distance2D(thumbTip, wrist);
+    const thumbBaseReach = distance2D(thumbMcp, wrist);
+    const thumbFar = thumbReach > thumbBaseReach * 1.2;
+
+    const indexBelowThumb = indexTip.y > thumbTip.y + 0.02;
+    const indexAboveThumb = indexTip.y < thumbTip.y - 0.02;
+    const thumbUp = (thumbLift > 0.03 || thumbTip.y < wrist.y - 0.08) && foldedCount >= 2 && thumbFar && indexBelowThumb;
+    const thumbDown = (thumbDrop > 0.03 || thumbTip.y > wrist.y + 0.08) && foldedCount >= 2 && thumbFar && indexAboveThumb;
+    const openPalm = otherExtendedCount >= 4 && thumbTip.y < landmarks[2].y;
+
+    if (thumbUp) {
+        return { label: "Thumb_Up", score: 0.82 };
+    }
+    if (thumbDown) {
+        return { label: "Thumb_Down", score: 0.82 };
+    }
+    if (openPalm) {
+        return { label: "Open_Palm", score: 0.74 };
+    }
+    return { label: "", score: 0 };
 }
 
 async function postJSON(url, body) {
@@ -502,6 +757,7 @@ async function getJSON(url) {
 
 function setVoiceUiState(mode, message = "") {
     const speakBtn = document.getElementById("speakBtn");
+    const speakAacBtn = document.getElementById("speakAacBtn");
     const stopBtn = document.getElementById("stopSpeakBtn");
     const chip = document.getElementById("voiceStatusChip");
     const pulse = document.getElementById("voicePulse");
@@ -511,6 +767,9 @@ function setVoiceUiState(mode, message = "") {
     stopBtn.classList.toggle("active", mode === "listening");
     speakBtn.classList.toggle("listening", mode === "listening");
     speakBtn.innerText = mode === "listening" ? "LISTENING" : "SPEAK";
+    if (speakAacBtn) {
+        speakAacBtn.disabled = mode === "listening" || mode === "processing";
+    }
     pulse.classList.toggle("cool", mode === "processing" || mode === "speaking");
     text.innerText = message || (mode === "listening" ? "Listening..." : mode === "processing" ? "Finishing..." : mode === "speaking" ? "Speaking..." : "");
 }
@@ -573,7 +832,7 @@ async function ensureLiveKitClient() {
     return livekitScriptPromise;
 }
 
-async function submitPartnerMessage(partnerText) {
+async function submitPartnerMessage(partnerText, signalOverride = null) {
     if (!sessionId) {
         alert("Press START first.");
         return null;
@@ -585,9 +844,18 @@ async function submitPartnerMessage(partnerText) {
     }
     document.getElementById("partnerInput").value = cleaned;
     lastPartnerText = cleaned;
-    await detectFaceSignals();
     const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
-    const requestSignals = buildRequestSignals();
+    let requestSignals = signalOverride;
+    if (!requestSignals) {
+        if (cameraEffective && document.getElementById("cameraToggle").checked) {
+            startCueCaptureWindow(0, 2600);
+            await waitForPostVoiceCueCaptureWindow();
+            requestSignals = finalizePostVoiceCueSignals(buildRequestSignals());
+        } else {
+            await detectFaceSignals();
+            requestSignals = buildRequestSignals();
+        }
+    }
     lastSubmittedSignals = requestSignals;
     const data = await postJSON("/aac/api/partner_message/", {
         session_id: sessionId,
@@ -606,6 +874,34 @@ async function submitPartnerMessage(partnerText) {
     renderDebug(data.debug_info || {});
     lastQueryId = data.query_id || "";
     renderMetrics(data.query_metrics_history || []);
+    if (!voiceCaptureActive) {
+        setVoiceUiState("idle");
+    }
+    return data;
+}
+
+async function requestSpeakAacSuggestions() {
+    if (!sessionId) {
+        alert("Press START first.");
+        return null;
+    }
+    await detectFaceSignals();
+    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const requestSignals = buildRequestSignals();
+    lastSubmittedSignals = requestSignals;
+    const data = await postJSON("/aac/api/speak_mode/", {
+        session_id: sessionId,
+        partner_name: document.getElementById("partnerName").value.trim(),
+        camera_on: cameraEffective,
+        face_signals: requestSignals,
+        client_now: localNowIso(),
+    });
+    if (data.error) {
+        alert(data.error);
+        return null;
+    }
+    renderSpeakSuggestions(data.grouped_suggestions || {});
+    renderDebug(data.debug_info || {});
     return data;
 }
 
@@ -649,6 +945,9 @@ async function stopVoiceCapture() {
         console.debug("microphone disable skipped", error);
     }
     voiceCaptureActive = false;
+    if (document.getElementById("cameraToggle").checked) {
+        startPostVoiceCueCapture();
+    }
     await pollVoiceTranscript();
 }
 
@@ -660,24 +959,35 @@ async function pollVoiceTranscript() {
     }
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
+        if (document.getElementById("cameraToggle").checked) {
+            try {
+                await detectFaceSignals();
+            } catch (error) {
+                console.debug("post-voice cue detection skipped", error);
+            }
+        }
         const data = await getJSON(`/aac/api/livekit/transcript/?session_id=${encodeURIComponent(sessionId)}&voice_turn_id=${encodeURIComponent(voiceTurnId)}`);
         if (data.error) {
             await disconnectLiveKitRoom(livekitVoiceRoom);
             livekitVoiceRoom = null;
+            postVoiceCueCapture = null;
             setVoiceUiState("idle");
             alert(data.error);
             return;
         }
         if (data.ready && data.transcript) {
+            await waitForPostVoiceCueCaptureWindow();
+            const cueSignals = finalizePostVoiceCueSignals(buildRequestSignals());
             currentVoiceTurnId = "";
             await disconnectLiveKitRoom(livekitVoiceRoom);
             livekitVoiceRoom = null;
             setVoiceUiState("idle");
-            await submitPartnerMessage(data.transcript);
+            await submitPartnerMessage(data.transcript, cueSignals);
             return;
         }
         await new Promise((resolve) => window.setTimeout(resolve, 400));
     }
+    postVoiceCueCapture = null;
     currentVoiceTurnId = "";
     await disconnectLiveKitRoom(livekitVoiceRoom);
     livekitVoiceRoom = null;
@@ -728,14 +1038,14 @@ async function speakConfirmedResponse(finalText) {
 }
 
 async function initMediaPipeFace() {
-    if ((faceLandmarkerReady || faceLandmarkerFailed) && (gestureRecognizerReady || gestureRecognizerFailed)) return;
+    if ((faceLandmarkerReady || faceLandmarkerFailed) && (gestureRecognizerReady || gestureRecognizerFailed) && (handLandmarkerReady || handLandmarkerFailed)) return;
     try {
         let visionApi = window.vision || null;
         if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
             const moduleRef = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14");
             visionApi = moduleRef.vision || moduleRef;
         }
-        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker || !visionApi.GestureRecognizer) {
+        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker || !visionApi.GestureRecognizer || !visionApi.HandLandmarker) {
             throw new Error("MediaPipe tasks-vision did not expose FaceLandmarker");
         }
         const fileset = await visionApi.FilesetResolver.forVisionTasks(
@@ -763,11 +1073,26 @@ async function initMediaPipeFace() {
                 numHands: 1,
             });
         }
+        if (!handLandmarkerReady && !handLandmarkerFailed) {
+            handLandmarker = await visionApi.HandLandmarker.createFromOptions(fileset, {
+                baseOptions: {
+                    modelAssetPath:
+                        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                },
+                runningMode: "VIDEO",
+                numHands: 2,
+                minHandDetectionConfidence: 0.15,
+                minHandPresenceConfidence: 0.15,
+                minTrackingConfidence: 0.15,
+            });
+        }
         faceLandmarkerReady = true;
         gestureRecognizerReady = true;
+        handLandmarkerReady = true;
         faceEngine = "mediapipe-face+hand";
         faceInitError = "";
         gestureInitError = "";
+        handInitError = "";
     } catch (error) {
         const text = error?.message || String(error);
         if (!faceLandmarkerReady) {
@@ -777,6 +1102,10 @@ async function initMediaPipeFace() {
         if (!gestureRecognizerReady) {
             gestureRecognizerFailed = true;
             gestureInitError = text;
+        }
+        if (!handLandmarkerReady) {
+            handLandmarkerFailed = true;
+            handInitError = text;
         }
         faceEngine = "fallback";
     }
@@ -1032,14 +1361,27 @@ async function detectFaceSignals() {
             status.innerText = `MediaPipe face error: ${error?.message || "unknown error"}`;
         }
     }
-    if (gestureRecognizerReady && gestureRecognizer) {
+    if ((gestureRecognizerReady && gestureRecognizer) || (handLandmarkerReady && handLandmarker)) {
         try {
-            const gestureResult = gestureRecognizer.recognizeForVideo(video, nowMs);
-            const gestureCategory = gestureResult?.gestures?.[0]?.[0] || null;
+            const gestureResult = gestureRecognizerReady && gestureRecognizer ? gestureRecognizer.recognizeForVideo(video, nowMs) : null;
+            const handResult = handLandmarkerReady && handLandmarker ? handLandmarker.detectForVideo(video, nowMs) : null;
+            let gestureCategory = gestureResult?.gestures?.[0]?.[0] || null;
             const handednessCategory = gestureResult?.handednesses?.[0]?.[0] || null;
-            const label = gestureCategory?.categoryName || "";
-            const score = gestureCategory?.score || 0;
-            const handedness = handednessCategory?.displayName || handednessCategory?.categoryName || "";
+            let label = gestureCategory?.categoryName || "";
+            let score = gestureCategory?.score || 0;
+            let handedness = handednessCategory?.displayName || handednessCategory?.categoryName || "";
+            const landmarks = gestureResult?.landmarks?.[0] || handResult?.landmarks?.[0] || null;
+            if (!handedness) {
+                const handLandmarkerHandedness = handResult?.handednesses?.[0]?.[0] || null;
+                handedness = handLandmarkerHandedness?.displayName || handLandmarkerHandedness?.categoryName || "";
+            }
+            if ((!label || label === "None" || score < 0.45) && landmarks) {
+                const inferred = inferGestureFromLandmarks(landmarks);
+                if (inferred.label && inferred.score > score) {
+                    label = inferred.label;
+                    score = inferred.score;
+                }
+            }
             const stableGesture = stabilizeGestureLabel(label, score, handedness, nowMs);
             rawSignals = { ...rawSignals, ...stableGesture };
             if (stableGesture.hand_detected) {
@@ -1074,12 +1416,15 @@ async function detectFaceSignals() {
     }
     latestFaceSignals = smoothFaceSignals(rawSignals);
     updateRecentSignalPeaks(latestFaceSignals);
+    recordPostVoiceCueSample(latestFaceSignals, nowMs);
     const gestureSuffix = gestureText ? ` gesture:${gestureText}` : "";
     if (faceDetected) {
         status.innerText = `Vision active (${faceEngine}) nod:${(latestFaceSignals?.nod_score ?? 0).toFixed(2)} shake:${(latestFaceSignals?.shake_score ?? 0).toFixed(2)}${gestureSuffix}`;
     } else if (latestFaceSignals?.hand_detected) {
         status.innerText = `Hand gesture detected (${faceEngine})${gestureSuffix}`;
-    } else if (faceLandmarkerFailed && gestureRecognizerFailed) {
+    } else if (lastStableHandSignal.label && Date.now() - (lastStableHandSignal.updatedAt || 0) <= 7000) {
+        status.innerText = `Recent hand gesture held (${faceEngine}) gesture:${lastStableHandSignal.label}${lastStableHandSignal.handedness ? ` (${lastStableHandSignal.handedness})` : ""}`;
+    } else if (faceLandmarkerFailed && gestureRecognizerFailed && handLandmarkerFailed) {
         status.innerText = `Vision init failed (${faceInitError || gestureInitError || "unknown"}); using neutral fallback`;
     } else {
         status.innerText = `Camera active, waiting for stable face/hand signal (${faceEngine})`;
@@ -1096,7 +1441,7 @@ function startFacePolling() {
         } catch (error) {
             document.getElementById("faceStatus").innerText = `Face polling error: ${error?.message || "unknown"}`;
         }
-    }, 350);
+    }, 180);
 }
 
 function stopFacePolling() {
@@ -1114,6 +1459,7 @@ document.getElementById("startBtn").onclick = async () => {
     }
     sessionId = data.session_id;
     document.getElementById("speakBtn").disabled = false;
+    document.getElementById("speakAacBtn").disabled = false;
     document.getElementById("sessionLabel").innerText = `Session: ${sessionId}`;
     document.getElementById("normalCards").innerHTML = "";
     document.getElementById("speakSuggestions").innerHTML = "";
@@ -1159,6 +1505,8 @@ document.getElementById("cameraToggle").onchange = async (event) => {
         handHistory = [];
         motionLatch = { nodUntil: 0, shakeUntil: 0 };
         recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: 0 };
+        lastStableHandSignal = { label: "", score: 0, handedness: "", updatedAt: 0 };
+        postVoiceCueCapture = null;
         stopFacePolling();
         if (stream) {
             stream.getTracks().forEach((track) => track.stop());
@@ -1180,6 +1528,10 @@ document.getElementById("speakBtn").onclick = async () => {
         return;
     }
     await startVoiceCapture();
+};
+
+document.getElementById("speakAacBtn").onclick = async () => {
+    await requestSpeakAacSuggestions();
 };
 
 document.getElementById("stopSpeakBtn").onclick = async () => {

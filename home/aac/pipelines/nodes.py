@@ -20,11 +20,22 @@ BUCKET_KEYWORDS = {
 
 GREETING_TOKENS = {"hi", "hii", "hiii", "hello", "hey", "yo", "sup", "hiya"}
 GREETING_VOCATIVES = {"bro", "broo", "man", "dude", "buddy", "bhai"}
+GREETING_PHRASES = {"how are you", "how is it going", "how's it going", "good morning", "good afternoon", "good evening", "nice to see you"}
 PARTNER_TOPIC_KEYWORDS = {
     "omer": {"movie", "regal", "bus", "stop", "cricket"},
     "vansh": {"project", "check-in", "check", "slides", "cse", "lab", "deadline", "rehearsal"},
     "siddharth": {"grocery", "timeline", "schedule", "charger", "reminder"},
     "aditya": {"cricket", "weekend", "casual"},
+}
+
+MEDICATION_QUERY_MARKERS = {
+    "medication",
+    "medicine",
+    "meds",
+    "pill",
+    "pills",
+    "dose",
+    "doses",
 }
 
 
@@ -40,15 +51,21 @@ def face_cue_node(camera_on: bool, provided_face_signals: FaceSignals) -> FaceSi
     shake = float(provided_face_signals.get("shake_score", provided_face_signals.get("head_shake_score", 0.0)))
     hand_gesture = str(provided_face_signals.get("hand_gesture_label", "") or "").strip()
     hand_gesture_score = float(provided_face_signals.get("hand_gesture_score", 0.0) or 0.0)
-    if hand_gesture_score >= 0.55:
+    if hand_gesture_score >= 0.45:
         if hand_gesture in {"Thumb_Up", "Victory", "ILoveYou"}:
             nod = max(nod, min(1.0, 0.58 + 0.3 * hand_gesture_score))
             smile = max(smile, min(1.0, 0.42 + 0.25 * hand_gesture_score))
+            shake = min(shake, 0.12)
+            negative = min(negative, 0.15)
         elif hand_gesture in {"Thumb_Down", "Closed_Fist"}:
             shake = max(shake, min(1.0, 0.58 + 0.3 * hand_gesture_score))
             negative = max(negative, min(1.0, 0.4 + 0.35 * hand_gesture_score))
+            nod = min(nod, 0.12)
+            smile = min(smile, 0.22)
         elif hand_gesture in {"Open_Palm", "Pointing_Up"}:
             confused = max(confused, min(1.0, 0.34 + 0.28 * hand_gesture_score))
+            nod = min(nod, 0.18)
+            shake = min(shake, 0.18)
     neutral = float(provided_face_signals.get("neutral_prob", max(0.0, 1.0 - smile - confused)))
     strongest = max(smile, confused, neutral, negative, nod, shake)
     inferred_detected = strongest > 0.08 or (smile + confused + neutral) > 0.2
@@ -73,6 +90,8 @@ def face_cue_node(camera_on: bool, provided_face_signals: FaceSignals) -> FaceSi
 def router_node(partner_text: str) -> str:
     lower = partner_text.lower()
     if is_short_greeting(partner_text):
+        return "Contextual"
+    if _is_medication_status_query(partner_text):
         return "Contextual"
     personal_markers = ["your", "family", "favorite", "prefer", "you like", "your mom", "your dad"]
     contextual_markers = ["today", "tonight", "now", "later", "plan", "reminder", "meeting", "movie"]
@@ -99,13 +118,19 @@ def source_priority_planner_node(label: str) -> List[str]:
 def is_short_greeting(partner_text: str) -> bool:
     tokens = tokenize(partner_text)
     cleaned = re.sub(r"[^a-zA-Z]", "", (partner_text or "").lower())
+    normalized = re.sub(r"[^a-zA-Z'\s]+", " ", (partner_text or "").lower())
+    normalized = re.sub(r"\s+", " ", normalized).strip()
     if cleaned in GREETING_TOKENS:
         return True
     if not tokens:
         return False
+    if any(phrase in normalized for phrase in GREETING_PHRASES) and len(tokens) <= 6:
+        return True
     if tokens[0] in GREETING_TOKENS and len(tokens) <= 3:
         tail = tokens[1:]
         return not tail or all(token in GREETING_VOCATIVES for token in tail)
+    if tokens[0] in GREETING_TOKENS and any(phrase in normalized for phrase in {"how are you", "how's it going", "how is it going"}):
+        return True
     return len(tokens) <= 2 and any(token in GREETING_TOKENS for token in tokens)
 
 
@@ -118,6 +143,8 @@ def bucket_selector_node(partner_text: str, label: str, active_partner_relation:
         selected.append(inferred)
     if label == "Contextual":
         selected.extend(["plans", "routine"])
+    if _is_medication_status_query(partner_text):
+        selected.extend(["medical", "routine"])
     if label == "Personal" and active_partner_relation == "friend":
         selected.append("family")
     if face_signals and face_signals.get("confused_prob", 0.0) > 0.45:
@@ -466,6 +493,55 @@ def _is_schedule_summary_query(partner_text: str) -> bool:
     )
 
 
+def _is_medication_status_query(partner_text: str) -> bool:
+    text = (partner_text or "").strip().lower()
+    if not text:
+        return False
+    tokens = set(tokenize(text))
+    has_medication_word = bool(tokens.intersection(MEDICATION_QUERY_MARKERS)) or "medication" in text
+    if not has_medication_word:
+        return False
+    return any(
+        phrase in text
+        for phrase in [
+            "did you already take",
+            "did you take",
+            "have you taken",
+            "did you already have",
+            "already take",
+            "already took",
+            "take your medication",
+            "take your medicine",
+            "taken your medication",
+            "taken your medicine",
+        ]
+    )
+
+
+def _extract_medication_schedule_hint(state: SessionState, evidence: List[RetrievalEvidence]) -> str:
+    sources = [ev.text for ev in evidence[:4]] + [str(item) for item in state.stm.get("today_plans", [])] + [str(item) for item in state.stm.get("reminders", [])]
+    for line in sources:
+        lower = line.lower()
+        if any(word in lower for word in ["medication", "medicine", "meds", "pill"]):
+            match = re.search(r"\b\d{1,2}(?::\d{2})?\s*(am|pm)\b", line, flags=re.IGNORECASE)
+            if match:
+                return match.group(0).upper()
+    return ""
+
+
+def _generate_medication_status_options(state: SessionState, evidence: List[RetrievalEvidence], face_signals: FaceSignals) -> List[str]:
+    schedule_hint = _extract_medication_schedule_hint(state, evidence)
+    schedule_clause = f" It is scheduled for {schedule_hint}." if schedule_hint else ""
+    careful = f"I am not sure if I already took it.{schedule_clause}"
+    clarify = "Please check with me or remind me again."
+    memory_only = f"I remember medication is planned{f' for {schedule_hint}' if schedule_hint else ''}, but I cannot confirm it is done."
+    if (face_signals or {}).get("confused_prob", 0.0) > 0.45:
+        return [careful, clarify, memory_only]
+    if (face_signals or {}).get("shake_score", 0.0) > 0.55 or (face_signals or {}).get("negative_prob", 0.0) > 0.5:
+        return [careful, memory_only, clarify]
+    return [careful, memory_only, clarify]
+
+
 def _extract_memory_time_token(evidence_lines: List[str]) -> str:
     for line in evidence_lines:
         match = re.search(r"\b\d{1,2}(:\d{2})?\s*(am|pm)\b", line, flags=re.IGNORECASE)
@@ -582,6 +658,9 @@ def candidate_generator_node(
 
     if _is_schedule_summary_query(partner_text):
         return _generate_schedule_summary_options(state=state, face_signals=face_signals)
+
+    if _is_medication_status_query(partner_text):
+        return _generate_medication_status_options(state=state, evidence=evidence, face_signals=face_signals)
 
     if _is_plan_change_prompt(partner_text):
         return _generate_plan_change_options(evidence)
@@ -722,6 +801,9 @@ def postprocess_candidate_text(text: str) -> str:
         cleaned = re.sub(re.escape(fragment), "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\brecent turn partner:\s*", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\bPartner asked\b", "You asked", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\bI remember\s+Partner is [^.?!]+[.?!]?\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\bPartner is [^.?!]+[.?!]?\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\bpartner profile:\s*[^.?!]+[.?!]?\s*", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\bI want to say\s*[.:,-]*\s*", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\bQuick note\s*[,:-]*\s*", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"^[\s\.,;:!\?-]+", "", cleaned)
@@ -764,6 +846,8 @@ def enforce_memory_signature(options: List[str], evidence: List[RetrievalEvidenc
         return options
     detail = _extract_memory_detail([item.text for item in evidence[:3]])
     if not detail:
+        return options
+    if detail.lower().startswith("partner is ") or detail.lower().startswith("partner profile:"):
         return options
     revised = []
     for idx, option in enumerate(options):
@@ -820,7 +904,7 @@ def _sanitize_greeting_options(options: List[str]) -> List[str]:
     defaults = ["Hi, good to see you.", "Hey! How are you?", "Hello!"]
     for idx, option in enumerate(options[:3]):
         tokens = set(tokenize(option))
-        if tokens.intersection(banned):
+        if tokens.intersection(banned) or re.search(r"\bpartner is\b|\bpartner profile\b", option, flags=re.IGNORECASE):
             clean.append(defaults[idx])
         else:
             clean.append(option if option else defaults[idx])
