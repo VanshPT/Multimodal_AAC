@@ -2,3 +2,8 @@ db.sqlite3
 __pycache__
 .env
 ,env
+.venv/
+.DS_Store
+*.pyc
+outputs/run_logs.jsonl
+nlp_video.mp4

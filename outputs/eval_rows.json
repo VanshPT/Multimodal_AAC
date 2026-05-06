@@ -1,0 +1,422 @@
+[
+  {
+    "text": "Are we still on for the movie tonight?",
+    "lead_option": "Yes, I remember the movie is at 7 PM, Yes, we are still on for the movie tonight.",
+    "bleu_peak": 0.3162,
+    "rouge_peak": 0.5385,
+    "groundedness_peak": 0.7143,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "plans",
+      "scheduling",
+      "routine"
+    ],
+    "expected_bucket": "scheduling",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1675,
+    "mm_polarity": "positive",
+    "mm_boosts": {
+      "plans": 0.3
+    }
+  },
+  {
+    "text": "Do you want to skip the dentist tomorrow?",
+    "lead_option": "No, I want to answer carefully. Could you confirm one detail so I stay accurate.",
+    "bleu_peak": 0.239,
+    "rouge_peak": 0.3333,
+    "groundedness_peak": 0.6364,
+    "router_label": "Personal",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "scheduling",
+      "medical",
+      "plans"
+    ],
+    "expected_bucket": "medical",
+    "polarity_target": "negative",
+    "polarity_aligned": true,
+    "latency_ms": 1523,
+    "mm_polarity": "negative",
+    "mm_boosts": {
+      "medical": 0.3
+    }
+  },
+  {
+    "text": "Should I call your mom?",
+    "lead_option": "I remember That plan is okay, Yes, please call her.",
+    "bleu_peak": 0.2582,
+    "rouge_peak": 0.4,
+    "groundedness_peak": 0.1429,
+    "router_label": "Personal",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "family",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "family",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1734,
+    "mm_polarity": "positive",
+    "mm_boosts": {
+      "family": 0.3
+    }
+  },
+  {
+    "text": "How is your day going?",
+    "lead_option": "I remember Hey, how is your day going?, My day is going well, .",
+    "bleu_peak": 0.1816,
+    "rouge_peak": 0.3,
+    "groundedness_peak": 0.8571,
+    "router_label": "Personal",
+    "expected_intent": "Open-domain",
+    "buckets_chosen": [
+      "plans",
+      "routine",
+      "clarify_calm"
+    ],
+    "expected_bucket": "open_domain",
+    "polarity_target": "neutral",
+    "polarity_aligned": true,
+    "latency_ms": 2428,
+    "mm_polarity": "neutral",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Want to grab lunch with the team at noon?",
+    "lead_option": "Yes, I remember today plan: Want to grab lunch with the team at noon, Yes, I can meet at noon.",
+    "bleu_peak": 0.5192,
+    "rouge_peak": 0.6667,
+    "groundedness_peak": 0.6667,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "food",
+      "scheduling",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "social",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1741,
+    "mm_polarity": "positive",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Should we cancel the meeting at 3?",
+    "lead_option": "No, I remember I need to leave in twenty minutes, No, I can make the meeting.",
+    "bleu_peak": 0.0,
+    "rouge_peak": 0.3636,
+    "groundedness_peak": 0.4444,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "scheduling",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "work",
+    "polarity_target": "negative",
+    "polarity_aligned": true,
+    "latency_ms": 2147,
+    "mm_polarity": "negative",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Did you take your medication today?",
+    "lead_option": "Yes, I remember that is planned for 8:30 PM, Yes, I took my evening medication.",
+    "bleu_peak": 0.239,
+    "rouge_peak": 0.3636,
+    "groundedness_peak": 0.5556,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "medical",
+      "scheduling",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "medical",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1532,
+    "mm_polarity": "positive",
+    "mm_boosts": {
+      "medical": 0.3
+    }
+  },
+  {
+    "text": "Hi there, how are you?",
+    "lead_option": "I remember That plan is okay, I am good, thank you for asking.",
+    "bleu_peak": 0.1387,
+    "rouge_peak": 0.3333,
+    "groundedness_peak": 0.5,
+    "router_label": "Personal",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "greeting_smalltalk",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "open_domain",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 2089,
+    "mm_polarity": "neutral",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Do you want to invite Alex for dinner?",
+    "lead_option": "Yes, I remember Want to reschedule our coffee chat, Yes, I want to invite Alex for dinner.",
+    "bleu_peak": 0.2582,
+    "rouge_peak": 0.4348,
+    "groundedness_peak": 0.5556,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "food",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "social",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1385,
+    "mm_polarity": "positive",
+    "mm_boosts": {}
+  },
+  {
+    "text": "What time is the movie?",
+    "lead_option": "I remember the movie is at 7 PM, The movie starts at seven.",
+    "bleu_peak": 0.3892,
+    "rouge_peak": 0.5263,
+    "groundedness_peak": 0.6,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "plans",
+      "routine",
+      "clarify_calm"
+    ],
+    "expected_bucket": "scheduling",
+    "polarity_target": "neutral",
+    "polarity_aligned": true,
+    "latency_ms": 1532,
+    "mm_polarity": "neutral",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Are you in pain right now?",
+    "lead_option": "No, I remember I prefer a short answer right now, No, I am not experiencing pain at the moment.",
+    "bleu_peak": 0.2294,
+    "rouge_peak": 0.3704,
+    "groundedness_peak": 0.6667,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "medical",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "medical",
+    "polarity_target": "negative",
+    "polarity_aligned": true,
+    "latency_ms": 1764,
+    "mm_polarity": "negative",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Should we visit your sister this weekend?",
+    "lead_option": "I remember Yes, that works for me, Yes, that sounds like a good plan.",
+    "bleu_peak": 0.2673,
+    "rouge_peak": 0.4286,
+    "groundedness_peak": 0.2857,
+    "router_label": "Personal",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "family",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "family",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 4328,
+    "mm_polarity": "positive",
+    "mm_boosts": {
+      "family": 0.3
+    }
+  },
+  {
+    "text": "Do you need anything from the store?",
+    "lead_option": "I remember That plan is okay, No, thank you. I don't need anything.",
+    "bleu_peak": 0.0,
+    "rouge_peak": 0.0,
+    "groundedness_peak": 0.5,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "plans",
+      "clarify_calm",
+      "routine"
+    ],
+    "expected_bucket": "medical",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1831,
+    "mm_polarity": "neutral",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Want me to repeat that?",
+    "lead_option": "I remember today plan: Want me to repeat that, I understand. Can you please repeat that.",
+    "bleu_peak": 0.0,
+    "rouge_peak": 0.0952,
+    "groundedness_peak": 0.5,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "clarify_calm",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "clarify",
+    "polarity_target": "clarify",
+    "polarity_aligned": true,
+    "latency_ms": 1529,
+    "mm_polarity": "neutral",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Is the lab work scheduled for Friday?",
+    "lead_option": "Yes, I remember the check-in is at 11:00 AM, Yes, the lab work is scheduled for Friday.",
+    "bleu_peak": 0.3587,
+    "rouge_peak": 0.5833,
+    "groundedness_peak": 0.4,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "scheduling",
+      "medical",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "medical",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1640,
+    "mm_polarity": "positive",
+    "mm_boosts": {
+      "medical": 0.3
+    }
+  },
+  {
+    "text": "Do you want to skip therapy this week?",
+    "lead_option": "No, I remember I can make my own choices, No, I am not able to skip.",
+    "bleu_peak": 0.138,
+    "rouge_peak": 0.2609,
+    "groundedness_peak": 0.5,
+    "router_label": "Personal",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "medical",
+      "plans",
+      "clarify_calm"
+    ],
+    "expected_bucket": "medical",
+    "polarity_target": "negative",
+    "polarity_aligned": true,
+    "latency_ms": 1489,
+    "mm_polarity": "negative",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Should I email your boss about the deadline?",
+    "lead_option": "Yes, I remember reminder: Message Siddharth about tomorrow timeline, Yes, please email my boss about the deadline.",
+    "bleu_peak": 0.4537,
+    "rouge_peak": 0.64,
+    "groundedness_peak": 0.6667,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "scheduling",
+      "work",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "work",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1429,
+    "mm_polarity": "positive",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Are you up for a walk in the park?",
+    "lead_option": "I remember communication_style: preferred_length: short, Yes, I want to go for a walk.",
+    "bleu_peak": 0.3204,
+    "rouge_peak": 0.4286,
+    "groundedness_peak": 0.6,
+    "router_label": "Personal",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "plans",
+      "clarify_calm",
+      "routine"
+    ],
+    "expected_bucket": "social",
+    "polarity_target": "positive",
+    "polarity_aligned": true,
+    "latency_ms": 1864,
+    "mm_polarity": "positive",
+    "mm_boosts": {}
+  },
+  {
+    "text": "Do you remember when grandpa is visiting?",
+    "lead_option": "I remember No, I remember I can make my own choices, I don't recall when grandpa is visiting.",
+    "bleu_peak": 0.0808,
+    "rouge_peak": 0.1667,
+    "groundedness_peak": 0.6,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "family",
+      "plans",
+      "clarify_calm",
+      "routine"
+    ],
+    "expected_bucket": "family",
+    "polarity_target": "positive",
+    "polarity_aligned": false,
+    "latency_ms": 1306,
+    "mm_polarity": "neutral",
+    "mm_boosts": {
+      "family": 0.3
+    }
+  },
+  {
+    "text": "Want to reschedule our coffee chat?",
+    "lead_option": "No, I remember Want to reschedule our coffee chat?, No, I can't do that right now.",
+    "bleu_peak": 0.0,
+    "rouge_peak": 0.087,
+    "groundedness_peak": 0.5,
+    "router_label": "Contextual",
+    "expected_intent": "Contextual",
+    "buckets_chosen": [
+      "food",
+      "social",
+      "plans",
+      "routine"
+    ],
+    "expected_bucket": "social",
+    "polarity_target": "negative",
+    "polarity_aligned": true,
+    "latency_ms": 1530,
+    "mm_polarity": "negative",
+    "mm_boosts": {}
+  }
+]

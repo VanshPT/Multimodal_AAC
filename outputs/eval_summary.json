@@ -1,0 +1,16 @@
+{
+  "n_cases": 20,
+  "bleu2_avg_peak": 0.2194,
+  "rouge_l_avg_peak": 0.366,
+  "groundedness_avg_peak": 0.5446,
+  "nli_faithfulness_avg_peak": 0.8,
+  "intent_accuracy": 0.65,
+  "bucket_routing_accuracy": 0.7,
+  "polarity_adherence": 0.95,
+  "memory_write_accuracy": 0.9,
+  "multimodal_alignment_avg": 0.875,
+  "latency_avg_ms": 1824.8,
+  "latency_p95_ms": 2428,
+  "latency_under_5000ms": true,
+  "fallback_engagement_rate": 0.45
+}

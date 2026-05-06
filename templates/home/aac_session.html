@@ -5,105 +5,233 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AAC Session</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1d2433; }
-        .container { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px; }
-        .panel { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-        .topbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-        .topbar button, .topbar select { padding: 7px 10px; border-radius: 8px; border: 1px solid #bbc4d4; }
-        .row { display: flex; gap: 8px; margin-bottom: 8px; }
-        textarea, input[type="text"] { width: 100%; border-radius: 8px; border: 1px solid #bbc4d4; padding: 8px; }
-        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
-        .card { border: 1px solid #d6dded; border-radius: 8px; padding: 12px; background: #fbfcff; font-size: 0.98rem; line-height: 1.35rem; word-break: break-word; overflow-wrap: anywhere; }
-        .card button { margin-top: 8px; width: 100%; padding: 6px; border: 0; border-radius: 6px; background: #4263eb; color: #fff; cursor: pointer; }
-        .sticky-edit { position: sticky; top: 0; background: #fff; padding-top: 4px; z-index: 2; }
-        .group h4 { margin-bottom: 4px; }
-        .group-header { display: flex; justify-content: space-between; align-items: center; }
-        .group-item { display: flex; gap: 8px; margin-bottom: 8px; }
-        .group-item button { min-width: 70px; }
-        video { width: 230px; height: 170px; border-radius: 8px; background: #222; }
-        .chip { display: inline-block; background: #eef2ff; border: 1px solid #ccd6ff; border-radius: 12px; padding: 2px 8px; margin-right: 6px; }
-        .muted { color: #687086; font-size: 0.92rem; }
-        .error-banner { display: none; margin: 8px 0; padding: 8px 10px; border-radius: 8px; border: 1px solid #f3b2b2; background: #fff0f0; color: #8b1f1f; }
-        .final-output { border: 1px solid #c5f0cf; background: #edfff2; border-radius: 8px; padding: 8px; margin-top: 8px; }
-        .transcript { max-height: 220px; overflow-y: auto; border: 1px solid #d6dded; border-radius: 8px; padding: 8px; background: #fff; }
-        .memory-toast {
-            position: fixed;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            align-items: center;
+        body {
+            font-family: "Inter", "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            color: #1d2433;
+            background: radial-gradient(circle at top left, #eef3ff 0%, #f6f8fc 45%, #f9fbff 100%);
+        }
+        .container {
+            max-width: 1480px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(780px, 1fr) 360px;
+            gap: 18px;
+            padding: 18px;
+        }
+        .panel {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #dfe6f4;
+            box-shadow: 0 10px 30px rgba(23, 52, 110, 0.08);
+        }
+        .main-panel { overflow: hidden; }
+        .side-panel { position: sticky; top: 14px; height: fit-content; }
+        .header-block {
+            background: linear-gradient(130deg, #2f5bda 0%, #4c7af0 45%, #6995ff 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+        .header-title {
+            margin: 0;
+            font-size: 1.25rem;
+            letter-spacing: 0.2px;
+        }
+        .header-subtitle {
+            margin-top: 6px;
+            opacity: 0.95;
+            font-size: 0.92rem;
+        }
+        h3 {
+            margin: 16px 0 8px;
+            font-size: 1.06rem;
+            color: #22314f;
+        }
+        .topbar {
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
-            z-index: 1000;
-            padding: 10px 14px;
-            border-radius: 999px;
-            border: 1px solid #9ed8ae;
-            background: #edfff2;
-            color: #1f5f33;
-            box-shadow: 0 8px 24px rgba(29, 36, 51, 0.12);
-        }
-        .memory-toast button {
-            border: 0;
-            background: transparent;
-            color: #1f5f33;
-            font-weight: 700;
-            cursor: pointer;
-            padding: 0 2px;
-        }
-        .voice-chip {
-            display: none;
             align-items: center;
-            gap: 8px;
-            border: 1px solid #ccd6ff;
-            background: #eef2ff;
-            border-radius: 999px;
-            padding: 5px 10px;
-            color: #27408b;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #e3e9f6;
+            border-radius: 10px;
+            background: #fbfdff;
         }
-        .voice-chip.active {
+        .topbar label {
+            font-size: 0.92rem;
+            color: #2f3d58;
             display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .voice-pulse {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: #e03131;
-            box-shadow: 0 0 0 rgba(224, 49, 49, 0.45);
-            animation: voicePulse 1s infinite;
+        .topbar button, .topbar select {
+            padding: 8px 11px;
+            border-radius: 9px;
+            border: 1px solid #bbc8e0;
+            background: #ffffff;
+            color: #1f2c45;
         }
-        .voice-pulse.cool {
-            background: #4263eb;
-            box-shadow: 0 0 0 rgba(66, 99, 235, 0.3);
+        .topbar button { cursor: pointer; font-weight: 600; }
+        #startBtn, #sendPartnerBtn, #speakBtn, #confirmBtn {
+            background: #335fda;
+            color: #ffffff;
+            border-color: #335fda;
         }
-        .voice-stop {
-            display: none;
-            border: 1px solid #d0d7ea;
-            background: #fff;
+        #startBtn:hover, #sendPartnerBtn:hover, #speakBtn:hover, #confirmBtn:hover {
+            background: #2b52c1;
+            border-color: #2b52c1;
+        }
+        .row { display: flex; gap: 8px; margin-bottom: 8px; }
+        textarea, input[type="text"] {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #bfcbdf;
+            padding: 9px 10px;
+            font-size: 0.95rem;
+            background: #ffffff;
             color: #1d2433;
         }
-        .voice-stop.active {
-            display: inline-block;
+        textarea:focus, input[type="text"]:focus, select:focus {
+            outline: 2px solid #adc2ff;
+            border-color: #7a9aff;
         }
-        .speak-btn.listening {
-            background: #ffe3e3;
-            border-color: #ffb3b3;
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .card {
+            border: 1px solid #dbe4f5;
+            border-radius: 12px;
+            padding: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+            font-size: 0.98rem;
+            line-height: 1.4rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            transition: transform 0.14s ease, box-shadow 0.14s ease;
+        }
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(30, 65, 140, 0.08);
+        }
+        .card button {
+            margin-top: 9px;
+            width: 100%;
+            padding: 7px;
+            border: 0;
+            border-radius: 7px;
+            background: #4263eb;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .sticky-edit {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            padding: 8px 0 2px;
+            z-index: 2;
+            border-top: 1px solid #eef2fb;
+            border-bottom: 1px solid #eef2fb;
+            margin: 12px 0;
+        }
+        .group h4 { margin-bottom: 6px; color: #26334f; }
+        .group-header { display: flex; justify-content: space-between; align-items: center; }
+        .group-header button {
+            border: 1px solid #bfcbe2;
+            background: #fff;
+            border-radius: 8px;
+            padding: 5px 8px;
+            cursor: pointer;
+        }
+        .group-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px;
+            border: 1px solid #e3e9f6;
+            border-radius: 8px;
+            background: #fcfdff;
+        }
+        .group-item button {
+            min-width: 74px;
+            border: 0;
+            border-radius: 7px;
+            background: #2f5ad7;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        video {
+            width: 280px;
+            height: 205px;
+            border-radius: 12px;
+            background: #1d2433;
+            border: 1px solid #cad4e7;
+        }
+        .chip {
+            display: inline-block;
+            background: #eef2ff;
+            border: 1px solid #ccd6ff;
+            border-radius: 14px;
+            padding: 3px 9px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+            color: #304162;
+        }
+        .muted { color: #687086; font-size: 0.92rem; }
+        .error-banner {
+            display: none;
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #f3b2b2;
+            background: #fff0f0;
             color: #8b1f1f;
         }
-        @keyframes voicePulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.45); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(224, 49, 49, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(224, 49, 49, 0); }
+        .final-output {
+            border: 1px solid #c5f0cf;
+            background: #edfff2;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+        .transcript {
+            max-height: 230px;
+            overflow-y: auto;
+            border: 1px solid #d6dded;
+            border-radius: 10px;
+            padding: 8px;
+            background: #fff;
+        }
+        .section-box {
+            border: 1px solid #e5ebf8;
+            border-radius: 10px;
+            padding: 10px;
+            background: #fbfdff;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 1200px) {
+            .container { grid-template-columns: 1fr; }
+            .side-panel { position: static; }
         }
     </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 <body>
-    <div id="memoryToast" class="memory-toast" role="status" aria-live="polite">
-        <span id="memoryToastText">Memory updated.</span>
-        <button id="memoryToastClose" type="button" aria-label="Dismiss memory update message">×</button>
-    </div>
     <div class="container">
-        <section class="panel">
-            <h2>AAC Session</h2>
+        <section class="panel main-panel">
+            <div class="header-block">
+                <h2 class="header-title">AAC Session Console</h2>
+                <div class="header-subtitle">Memory-grounded reply generation with multimodal face and gesture cues</div>
+            </div>
             <div id="llmErrorBanner" class="error-banner"></div>
             <div class="topbar">
                 <label>User:
@@ -123,19 +251,21 @@
                     <option value="neutral">neutral</option>
                     <option value="nod_yes">nod_yes</option>
                     <option value="shake_no">shake_no</option>
-                    <option value="indian_nod">indian_nod</option>
-                    <option value="thumbs_up">thumbs_up</option>
-                    <option value="thumbs_down">thumbs_down</option>
-                    <option value="open_palm">open_palm</option>
                 </select>
+                <label>Sim Emotion:
+                    <select id="simulateEmotionPreset">
+                        <option value="">(none — 3 tone variants)</option>
+                        <option value="happy">happy → warm</option>
+                        <option value="sad">sad → gentle</option>
+                        <option value="angry">angry → assertive</option>
+                        <option value="surprised">surprised → curious</option>
+                        <option value="fearful">fearful → reassuring</option>
+                        <option value="disgusted">disgusted → polite_decline</option>
+                        <option value="neutral">neutral → neutral</option>
+                    </select>
+                </label>
                 <label><input type="checkbox" id="pbToggle" checked> PB Enabled</label>
-                <button id="speakBtn" class="speak-btn" disabled>SPEAK</button>
-                <button id="speakAacBtn" disabled>SPEAK AAC</button>
-                <span id="voiceStatusChip" class="voice-chip" aria-live="polite">
-                    <span id="voicePulse" class="voice-pulse"></span>
-                    <span id="voiceStatusText">Listening...</span>
-                </span>
-                <button id="stopSpeakBtn" class="voice-stop" type="button" aria-label="Stop voice capture">x</button>
+                <button id="speakBtn" disabled>SPEAK</button>
                 <span id="sessionLabel" class="muted">Session not started</span>
             </div>
             <div class="topbar">
@@ -143,15 +273,54 @@
                 <span id="liveClock" class="chip">Local time: --</span>
             </div>
 
-            <div class="row">
+            <div class="section-box row">
                 <div>
                     <video id="cameraPreview" autoplay playsinline hidden></video>
                     <div id="faceStatus" class="muted">Camera OFF</div>
                 </div>
             </div>
 
+            <h3>Multimodal sensors (live)</h3>
+            <div class="section-box" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="row" style="flex-wrap:wrap;gap:14px;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <button id="micBtn" type="button">🎤 Start mic</button>
+                        <span class="chip">Vocal:</span>
+                        <span id="vocalLive" class="muted">—</span>
+                        <span id="vocalTranscript" class="muted" style="font-style:italic;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <button id="hrBtn" type="button">❤ Start HR</button>
+                        <span class="chip">HR:</span>
+                        <span id="hrLive" class="muted">—</span>
+                    </div>
+                </div>
+                <div class="row" style="flex-wrap:wrap;gap:14px;align-items:flex-start;">
+                    <div>
+                        <div class="chip">Gesture (live)</div>
+                        <div id="gestureLive" class="muted">—</div>
+                    </div>
+                    <div>
+                        <div class="chip">Gaze region (live)</div>
+                        <div id="gazeLive" class="muted">—</div>
+                        <div class="muted" id="gazeDebug" style="font-size:11px;">yaw=0 pitch=0</div>
+                    </div>
+                    <div>
+                        <div class="chip">Hand sign (camera)</div>
+                        <div id="airLive" class="muted">—</div>
+                        <div class="muted" style="font-size:11px;">Y=pinky+thumb out · N=closed fist · ?=open palm up</div>
+                    </div>
+                    <div>
+                        <div class="chip">Facial emotion (face-api.js)</div>
+                        <div id="emotionLive" class="muted">—</div>
+                        <div class="muted" style="font-size:11px;">FER+ 7-class CNN, 100% local</div>
+                    </div>
+                </div>
+                <div class="muted" style="font-size:12px;">Mic uses Web Speech API. Gesture, gaze &amp; emotion require Camera ON. HR is simulated. Sim Emotion overrides camera for text testing.</div>
+            </div>
+
             <h3>Normal mode</h3>
-            <div class="row">
+            <div class="section-box row">
                 <input type="text" id="partnerInput" placeholder="Partner message">
                 <button id="sendPartnerBtn">Send Partner Message</button>
             </div>
@@ -165,7 +334,7 @@
             </div>
 
             <h3>Speak mode suggestions</h3>
-            <div id="speakSuggestions"></div>
+            <div id="speakSuggestions" class="section-box"></div>
 
             <h3>Transcript</h3>
             <div id="transcript" class="transcript"></div>
@@ -191,7 +360,7 @@
                 <div style="margin-top:8px;"><a href="/metrics/">Open full metrics page</a></div>
             </div>
         </section>
-        <aside class="panel">
+        <aside class="panel side-panel">
             <h3>Debug / Explainability</h3>
             <div><span class="chip">Router</span><span id="dbgRouter">-</span></div>
             <div><span class="chip">Sources</span><span id="dbgSources">-</span></div>
@@ -203,9 +372,6 @@
             <div><span class="chip">Nod score</span><span id="dbgNodScore">-</span></div>
             <div><span class="chip">Shake score</span><span id="dbgShakeScore">-</span></div>
             <div><span class="chip">Negative score</span><span id="dbgNegativeScore">-</span></div>
-            <div><span class="chip">Hand gesture</span><span id="dbgGesture">-</span></div>
-            <div><span class="chip">Gesture score</span><span id="dbgGestureScore">-</span></div>
-            <div><span class="chip">Vision engine</span><span id="dbgEngine">-</span></div>
             <div><span class="chip">Search order</span><span id="dbgOrder">-</span></div>
             <div><span class="chip">Buckets</span><span id="dbgBuckets">-</span></div>
             <div><span class="chip">Latency</span><span id="dbgLatency">-</span></div>
@@ -224,37 +390,30 @@ let lastPartnerText = "";
 let latestFaceSignals = null;
 let stream = null;
 let faceLandmarker = null;
-let gestureRecognizer = null;
-let handLandmarker = null;
 let faceLandmarkerReady = false;
 let faceLandmarkerFailed = false;
-let gestureRecognizerReady = false;
-let gestureRecognizerFailed = false;
-let handLandmarkerReady = false;
-let handLandmarkerFailed = false;
 let faceInitError = "";
-let gestureInitError = "";
-let handInitError = "";
 let faceEngine = "none";
 let facePollingTimer = null;
 let headHistory = [];
-let handHistory = [];
-let motionLatch = { nodUntil: 0, shakeUntil: 0 };
-let recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: 0 };
-let lastStableHandSignal = { label: "", score: 0, handedness: "", updatedAt: 0 };
-let lastSubmittedSignals = null;
 let lastQueryId = "";
 const transcript = [];
 let metricsHistory = [];
-let memoryToastTimer = null;
-let livekitScriptPromise = null;
-let livekitVoiceRoom = null;
-let livekitPlaybackRoom = null;
-let livekitAudioNodes = [];
-let voiceCaptureActive = false;
-let voiceFeatureActivated = false;
-let currentVoiceTurnId = "";
-let postVoiceCueCapture = null;
+
+// Live multimodal sensor state
+const liveSensors = { vocal: null, hr: null, gesture: null, gaze: null, airSign: null, facialEmotion: null };
+let handLandmarker = null;
+let handLandmarkerReady = false;
+let handLandmarkerFailed = false;
+let handPollingTimer = null;
+let micRecognition = null;
+let hrTimer = null;
+let wristHistory = [];        // [{x, t}] for hand-shake (oscillation) detection
+let faceApiReady = false;
+let faceApiFailed = false;
+let faceApiTimer = null;
+let lastEmotion = null;
+let lastEmotionConf = 0;
 
 function localNowIso() {
     return new Date().toISOString();
@@ -273,469 +432,20 @@ function startClock() {
 
 function smoothFaceSignals(raw) {
     if (!raw) return null;
-    if (!latestFaceSignals) {
-        const first = { ...raw };
-        first.smile_score = first.smile_score ?? first.smile_prob ?? 0;
-        first.smile_prob = first.smile_score;
-        first.confused_prob = first.confused_prob ?? 0;
-        first.neutral_prob = first.neutral_prob ?? 0;
-        first.negative_prob = first.negative_prob ?? 0;
-        first.nod_score = first.nod_score ?? 0;
-        first.shake_score = first.shake_score ?? 0;
-        first.hand_gesture_label = first.hand_gesture_label || "";
-        first.hand_gesture_score = first.hand_gesture_score ?? 0;
-        first.face_detected = first.face_detected ?? true;
-        first.hand_detected = first.hand_detected ?? Boolean(first.hand_gesture_label);
-        return first;
-    }
+    if (!latestFaceSignals) return raw;
     const alpha = 0.65;
-    const motionAlpha = 0.18;
-    const previousGesture = latestFaceSignals.hand_gesture_label || "";
-    const previousGestureScore = latestFaceSignals.hand_gesture_score ?? 0;
-    const currentGesture = raw.hand_gesture_label || "";
     const smooth = {
         smile_score: alpha * (latestFaceSignals.smile_score ?? latestFaceSignals.smile_prob ?? 0) + (1 - alpha) * (raw.smile_score ?? raw.smile_prob ?? 0),
-        confused_prob: alpha * (latestFaceSignals.confused_prob ?? 0) + (1 - alpha) * (raw.confused_prob ?? 0),
-        neutral_prob: alpha * (latestFaceSignals.neutral_prob ?? 0) + (1 - alpha) * (raw.neutral_prob ?? 0),
-        negative_prob: alpha * (latestFaceSignals.negative_prob ?? 0) + (1 - alpha) * (raw.negative_prob ?? 0),
-        nod_score: motionAlpha * (latestFaceSignals.nod_score ?? 0) + (1 - motionAlpha) * (raw.nod_score ?? 0),
-        shake_score: motionAlpha * (latestFaceSignals.shake_score ?? 0) + (1 - motionAlpha) * (raw.shake_score ?? 0),
-        hand_gesture_label: currentGesture || previousGesture,
-        hand_gesture_score: currentGesture
-            ? alpha * (currentGesture === previousGesture ? previousGestureScore : 0) + (1 - alpha) * (raw.hand_gesture_score ?? 0)
-            : Math.max(0, (previousGestureScore || 0) * 0.7),
-        face_detected: raw.face_detected ?? latestFaceSignals.face_detected ?? true,
-        hand_detected: raw.hand_detected ?? latestFaceSignals.hand_detected ?? false,
-        handedness: raw.handedness || latestFaceSignals.handedness || "",
+        confused_prob: alpha * latestFaceSignals.confused_prob + (1 - alpha) * raw.confused_prob,
+        neutral_prob: alpha * latestFaceSignals.neutral_prob + (1 - alpha) * raw.neutral_prob
     };
     const total = smooth.smile_score + smooth.confused_prob + smooth.neutral_prob || 1;
     smooth.smile_score /= total;
     smooth.confused_prob /= total;
     smooth.neutral_prob /= total;
+    smooth.face_detected = raw.face_detected ?? true;
     smooth.smile_prob = smooth.smile_score;
-    if (!smooth.hand_detected || smooth.hand_gesture_score < 0.25) {
-        smooth.hand_gesture_label = "";
-        smooth.hand_gesture_score = 0;
-    }
     return smooth;
-}
-
-function clamp01(value) {
-    return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
-}
-
-function countDirectionChanges(values, minStep = 1.5) {
-    let direction = 0;
-    let changes = 0;
-    for (let i = 1; i < values.length; i += 1) {
-        const delta = values[i] - values[i - 1];
-        if (Math.abs(delta) < minStep) continue;
-        const nextDirection = delta > 0 ? 1 : -1;
-        if (direction && nextDirection !== direction) changes += 1;
-        direction = nextDirection;
-    }
-    return changes;
-}
-
-function stabilizeMotionScore(key, score, nowMs) {
-    const holdMs = 900;
-    if (score >= 0.62) {
-        motionLatch[`${key}Until`] = nowMs + holdMs;
-        return Math.max(score, 0.72);
-    }
-    if ((motionLatch[`${key}Until`] || 0) > nowMs) {
-        return Math.max(score, 0.58);
-    }
-    return score;
-}
-
-function deriveHeadMotionScores(nowMs) {
-    headHistory = headHistory.filter((item) => nowMs - item.t <= 1600);
-    const recent = headHistory.slice(-12);
-    if (recent.length < 4) {
-        return { nodScore: 0, shakeScore: 0, wobbleScore: 0 };
-    }
-    const pitchValues = recent.map((item) => item.pitch);
-    const yawValues = recent.map((item) => item.yaw);
-    const pitchRange = Math.max(...pitchValues) - Math.min(...pitchValues);
-    const yawRange = Math.max(...yawValues) - Math.min(...yawValues);
-    const maxAbsPitch = Math.max(...pitchValues.map((value) => Math.abs(value)));
-    const maxAbsYaw = Math.max(...yawValues.map((value) => Math.abs(value)));
-    const pitchChanges = countDirectionChanges(pitchValues, 1.2);
-    const yawChanges = countDirectionChanges(yawValues, 1.2);
-    let nodScore = clamp01((pitchRange - 7) / 11) * (pitchChanges >= 2 ? 1 : 0.55);
-    let shakeScore = clamp01((yawRange - 8) / 12) * (yawChanges >= 2 ? 1 : 0.55);
-    let wobbleScore = 0;
-    if (maxAbsPitch > 10) nodScore = clamp01(nodScore + 0.12);
-    if (maxAbsYaw > 14 && yawChanges >= 2) shakeScore = clamp01(shakeScore + 0.18);
-    if (yawRange > pitchRange * 1.35) nodScore *= 0.75;
-    if (pitchRange > yawRange * 1.35) shakeScore *= 0.75;
-    if (yawChanges >= 2 && yawRange >= 4 && yawRange <= 11 && maxAbsYaw >= 6 && shakeScore < 0.58) {
-        wobbleScore = clamp01(((yawRange - 4) / 7) * 0.7 + (yawChanges >= 3 ? 0.2 : 0.05));
-        if (pitchRange > 9) wobbleScore *= 0.75;
-    }
-    nodScore = stabilizeMotionScore("nod", nodScore, nowMs);
-    shakeScore = stabilizeMotionScore("shake", shakeScore, nowMs);
-    return { nodScore: clamp01(nodScore), shakeScore: clamp01(shakeScore), wobbleScore: clamp01(wobbleScore) };
-}
-
-function buildNeutralSignalBaseline(overrides = {}) {
-    return {
-        smile_prob: 0.2,
-        confused_prob: 0.2,
-        neutral_prob: 0.6,
-        negative_prob: 0.1,
-        nod_score: 0.1,
-        shake_score: 0.1,
-        face_detected: true,
-        hand_detected: false,
-        hand_gesture_label: "",
-        hand_gesture_score: 0,
-        handedness: "",
-        ...overrides,
-    };
-}
-
-function updateRecentSignalPeaks(signals) {
-    const nowMs = Date.now();
-    if (!recentSignalPeaks.updatedAt || nowMs - recentSignalPeaks.updatedAt > 2200) {
-        recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: nowMs };
-    }
-    const elapsed = Math.max(0, nowMs - (recentSignalPeaks.updatedAt || nowMs));
-    const decay = Math.pow(0.42, elapsed / 900);
-    recentSignalPeaks.nod_score = Math.max((recentSignalPeaks.nod_score || 0) * decay, signals?.nod_score || 0);
-    recentSignalPeaks.shake_score = Math.max((recentSignalPeaks.shake_score || 0) * decay, signals?.shake_score || 0);
-    recentSignalPeaks.confused_prob = Math.max((recentSignalPeaks.confused_prob || 0) * decay, signals?.confused_prob || 0);
-    recentSignalPeaks.negative_prob = Math.max((recentSignalPeaks.negative_prob || 0) * decay, signals?.negative_prob || 0);
-    if ((signals?.hand_gesture_label || "") && (signals?.hand_gesture_score || 0) >= 0.45) {
-        recentSignalPeaks.hand_gesture_label = signals?.hand_gesture_label || "";
-        recentSignalPeaks.hand_gesture_score = signals?.hand_gesture_score || 0;
-        recentSignalPeaks.hand_updated_at = nowMs;
-        lastStableHandSignal = {
-            label: signals?.hand_gesture_label || "",
-            score: signals?.hand_gesture_score || 0,
-            handedness: signals?.handedness || "",
-            updatedAt: nowMs,
-        };
-    } else {
-        recentSignalPeaks.hand_gesture_score = (recentSignalPeaks.hand_gesture_score || 0) * decay;
-        if ((recentSignalPeaks.hand_gesture_score || 0) < 0.28 || (recentSignalPeaks.hand_updated_at && nowMs - recentSignalPeaks.hand_updated_at > 3600)) {
-            recentSignalPeaks.hand_gesture_label = "";
-            recentSignalPeaks.hand_gesture_score = 0;
-        }
-    }
-    recentSignalPeaks.updatedAt = nowMs;
-}
-
-function buildRequestSignals() {
-    if (!latestFaceSignals) return null;
-    const snapshot = JSON.parse(JSON.stringify(latestFaceSignals));
-    const nowMs = Date.now();
-    const peaksAreFresh = recentSignalPeaks.updatedAt && nowMs - recentSignalPeaks.updatedAt <= 1800;
-    const blendMotionPeak = (currentValue, peakValue) => {
-        const current = currentValue ?? 0;
-        const peak = peakValue ?? 0;
-        if (peak < 0.58) return Math.max(current, peak);
-        if (current < 0.18) return current;
-        if (current >= 0.5) return Math.max(current, peak);
-        if (current >= 0.3 && Math.abs(peak - current) <= 0.12) return Math.max(current, peak);
-        return current;
-    };
-    const blendEmotionPeak = (currentValue, peakValue) => {
-        const current = currentValue ?? 0;
-        const peak = peakValue ?? 0;
-        if (peak < 0.48) return Math.max(current, peak);
-        if (current >= 0.4) return Math.max(current, peak);
-        if (current >= 0.25 && Math.abs(peak - current) <= 0.18) return Math.max(current, peak);
-        return current;
-    };
-    if (peaksAreFresh) {
-        snapshot.nod_score = blendMotionPeak(snapshot.nod_score, recentSignalPeaks.nod_score || 0);
-        snapshot.shake_score = blendMotionPeak(snapshot.shake_score, recentSignalPeaks.shake_score || 0);
-        snapshot.confused_prob = blendEmotionPeak(snapshot.confused_prob, recentSignalPeaks.confused_prob || 0);
-        snapshot.negative_prob = blendEmotionPeak(snapshot.negative_prob, recentSignalPeaks.negative_prob || 0);
-        const currentHandIsStable = Boolean((snapshot.hand_gesture_label || "") && (snapshot.hand_gesture_score || 0) >= 0.45);
-        const recentHandIsFresh = recentSignalPeaks.hand_updated_at && nowMs - recentSignalPeaks.hand_updated_at <= 3600;
-        if ((!currentHandIsStable || (snapshot.hand_gesture_score || 0) < 0.55) && recentHandIsFresh && (recentSignalPeaks.hand_gesture_score || 0) >= 0.42) {
-            snapshot.hand_gesture_label = recentSignalPeaks.hand_gesture_label || "";
-            snapshot.hand_gesture_score = recentSignalPeaks.hand_gesture_score || 0;
-            snapshot.hand_detected = Boolean(snapshot.hand_gesture_label);
-        }
-        const stableHandIsFresh = lastStableHandSignal.updatedAt && nowMs - lastStableHandSignal.updatedAt <= 7000;
-        if ((!snapshot.hand_gesture_label || (snapshot.hand_gesture_score || 0) < 0.5) && stableHandIsFresh && (lastStableHandSignal.score || 0) >= 0.5) {
-            snapshot.hand_gesture_label = lastStableHandSignal.label || "";
-            snapshot.hand_gesture_score = lastStableHandSignal.score || 0;
-            snapshot.hand_detected = Boolean(snapshot.hand_gesture_label);
-            snapshot.handedness = lastStableHandSignal.handedness || snapshot.handedness || "";
-        }
-    }
-    if ((snapshot.hand_gesture_label || "") && (snapshot.hand_gesture_score || 0) >= 0.5) {
-        if (snapshot.hand_gesture_label === "Thumb_Up") {
-            snapshot.nod_score = Math.max(snapshot.nod_score || 0, 0.74);
-            snapshot.shake_score = Math.min(snapshot.shake_score || 0, 0.12);
-            snapshot.negative_prob = Math.min(snapshot.negative_prob || 0, 0.12);
-        } else if (snapshot.hand_gesture_label === "Thumb_Down") {
-            snapshot.shake_score = Math.max(snapshot.shake_score || 0, 0.74);
-            snapshot.nod_score = Math.min(snapshot.nod_score || 0, 0.12);
-            snapshot.smile_score = Math.min(snapshot.smile_score || 0, 0.18);
-            snapshot.negative_prob = Math.max(snapshot.negative_prob || 0, 0.5);
-        } else if (snapshot.hand_gesture_label === "Open_Palm") {
-            snapshot.confused_prob = Math.max(snapshot.confused_prob || 0, 0.58);
-            snapshot.nod_score = Math.min(snapshot.nod_score || 0, 0.18);
-            snapshot.shake_score = Math.min(snapshot.shake_score || 0, 0.18);
-        }
-    }
-    return snapshot;
-}
-
-function startCueCaptureWindow(delayMs = 0, durationMs = 4000) {
-    const nowMs = Date.now();
-    postVoiceCueCapture = {
-        collectFrom: nowMs + delayMs,
-        collectUntil: nowMs + delayMs + durationMs,
-        maxSmile: 0,
-        maxConfused: 0,
-        maxNegative: 0,
-        nodStrongFrames: 0,
-        shakeStrongFrames: 0,
-        maxNod: 0,
-        maxShake: 0,
-        handVotes: {},
-        handBestScores: {},
-        handHandedness: {},
-    };
-}
-
-function startPostVoiceCueCapture() {
-    startCueCaptureWindow(1000, 4000);
-}
-
-function recordPostVoiceCueSample(signals, nowMs) {
-    if (!postVoiceCueCapture || !signals) return;
-    if (nowMs < postVoiceCueCapture.collectFrom || nowMs > postVoiceCueCapture.collectUntil) return;
-    postVoiceCueCapture.maxSmile = Math.max(postVoiceCueCapture.maxSmile, signals.smile_score ?? signals.smile_prob ?? 0);
-    postVoiceCueCapture.maxConfused = Math.max(postVoiceCueCapture.maxConfused, signals.confused_prob ?? 0);
-    postVoiceCueCapture.maxNegative = Math.max(postVoiceCueCapture.maxNegative, signals.negative_prob ?? 0);
-    if ((signals.nod_score ?? 0) >= 0.68) {
-        postVoiceCueCapture.nodStrongFrames += 1;
-        postVoiceCueCapture.maxNod = Math.max(postVoiceCueCapture.maxNod, signals.nod_score ?? 0);
-    }
-    if ((signals.shake_score ?? 0) >= 0.68) {
-        postVoiceCueCapture.shakeStrongFrames += 1;
-        postVoiceCueCapture.maxShake = Math.max(postVoiceCueCapture.maxShake, signals.shake_score ?? 0);
-    }
-    const label = signals.hand_gesture_label || "";
-    const score = signals.hand_gesture_score || 0;
-    if (label && score >= 0.42) {
-        postVoiceCueCapture.handVotes[label] = (postVoiceCueCapture.handVotes[label] || 0) + 1;
-        postVoiceCueCapture.handBestScores[label] = Math.max(postVoiceCueCapture.handBestScores[label] || 0, score);
-        if (signals.handedness) {
-            postVoiceCueCapture.handHandedness[label] = signals.handedness;
-        }
-    }
-}
-
-async function waitForPostVoiceCueCaptureWindow() {
-    if (!postVoiceCueCapture) return;
-    setVoiceUiState("processing", "Reading facial cues...");
-    while (Date.now() < postVoiceCueCapture.collectUntil) {
-        if (document.getElementById("cameraToggle").checked) {
-            try {
-                await detectFaceSignals();
-            } catch (error) {
-                console.debug("cue window detect skipped", error);
-            }
-        }
-        await new Promise((resolve) => window.setTimeout(resolve, 170));
-    }
-}
-
-function finalizePostVoiceCueSignals(fallbackSignals) {
-    const capture = postVoiceCueCapture;
-    postVoiceCueCapture = null;
-    if (!capture) {
-        return fallbackSignals || buildRequestSignals() || latestFaceSignals;
-    }
-    const base = fallbackSignals ? JSON.parse(JSON.stringify(fallbackSignals)) : buildNeutralSignalBaseline({ face_detected: true });
-    base.nod_score = capture.nodStrongFrames >= 2 ? capture.maxNod : 0;
-    base.shake_score = capture.shakeStrongFrames >= 2 ? capture.maxShake : 0;
-    base.smile_score = Math.max(base.smile_score ?? base.smile_prob ?? 0, capture.maxSmile);
-    base.smile_prob = base.smile_score;
-    base.confused_prob = Math.max(base.confused_prob ?? 0, capture.maxConfused);
-    base.negative_prob = Math.max(base.negative_prob ?? 0, capture.maxNegative);
-    let bestLabel = "";
-    let bestVotes = 0;
-    let bestScore = 0;
-    Object.keys(capture.handVotes).forEach((label) => {
-        const votes = capture.handVotes[label] || 0;
-        const score = capture.handBestScores[label] || 0;
-        if (votes > bestVotes || (votes === bestVotes && score > bestScore)) {
-            bestLabel = label;
-            bestVotes = votes;
-            bestScore = score;
-        }
-    });
-    if (bestLabel && (bestVotes >= 2 || bestScore >= 0.72)) {
-        base.hand_gesture_label = bestLabel;
-        base.hand_gesture_score = bestScore;
-        base.hand_detected = true;
-        base.handedness = capture.handHandedness[bestLabel] || base.handedness || "";
-    }
-    if (base.hand_gesture_label === "Thumb_Up") {
-        base.nod_score = Math.max(base.nod_score ?? 0, 0.74);
-        base.shake_score = Math.min(base.shake_score ?? 0, 0.12);
-        base.negative_prob = Math.min(base.negative_prob ?? 0, 0.12);
-    } else if (base.hand_gesture_label === "Thumb_Down") {
-        base.shake_score = Math.max(base.shake_score ?? 0, 0.74);
-        base.nod_score = Math.min(base.nod_score ?? 0, 0.12);
-        base.negative_prob = Math.max(base.negative_prob ?? 0, 0.5);
-    } else if (base.hand_gesture_label === "Open_Palm") {
-        base.confused_prob = Math.max(base.confused_prob ?? 0, 0.62);
-        base.nod_score = Math.min(base.nod_score ?? 0, 0.18);
-        base.shake_score = Math.min(base.shake_score ?? 0, 0.18);
-    }
-    return base;
-}
-
-function stabilizeGestureLabel(label, score, handedness, nowMs) {
-    if (label && label !== "None" && score >= 0.45) {
-        handHistory.push({ label, score, handedness, t: nowMs });
-    }
-    handHistory = handHistory.filter((item) => nowMs - item.t <= 3600);
-    const grouped = new Map();
-    handHistory.forEach((item) => {
-        const bucket = grouped.get(item.label) || { count: 0, totalScore: 0, handedness: item.handedness };
-        bucket.count += 1;
-        bucket.totalScore += item.score;
-        bucket.handedness = item.handedness || bucket.handedness;
-        grouped.set(item.label, bucket);
-    });
-    let bestLabel = "";
-    let bestCount = 0;
-    let bestAvg = 0;
-    let bestHandedness = "";
-    grouped.forEach((bucket, gestureLabel) => {
-        const avg = bucket.totalScore / bucket.count;
-        if (bucket.count > bestCount || (bucket.count === bestCount && avg > bestAvg)) {
-            bestLabel = gestureLabel;
-            bestCount = bucket.count;
-            bestAvg = avg;
-            bestHandedness = bucket.handedness;
-        }
-    });
-    if (bestLabel && (bestCount >= 2 || bestAvg >= 0.62)) {
-        return { hand_gesture_label: bestLabel, hand_gesture_score: clamp01(bestAvg), hand_detected: true, handedness: bestHandedness };
-    }
-    if (label && label !== "None" && score >= 0.58) {
-        return { hand_gesture_label: label, hand_gesture_score: clamp01(score), hand_detected: true, handedness: handedness || "" };
-    }
-    if (latestFaceSignals?.hand_gesture_label && (latestFaceSignals.hand_gesture_score ?? 0) > 0.45) {
-        return {
-            hand_gesture_label: latestFaceSignals.hand_gesture_label,
-            hand_gesture_score: clamp01((latestFaceSignals.hand_gesture_score ?? 0) * 0.85),
-            hand_detected: true,
-            handedness: latestFaceSignals.handedness || "",
-        };
-    }
-    if (lastStableHandSignal.label && (lastStableHandSignal.score || 0) >= 0.5 && Date.now() - (lastStableHandSignal.updatedAt || 0) <= 7000) {
-        return {
-            hand_gesture_label: lastStableHandSignal.label,
-            hand_gesture_score: clamp01(lastStableHandSignal.score),
-            hand_detected: true,
-            handedness: lastStableHandSignal.handedness || "",
-        };
-    }
-    return { hand_gesture_label: "", hand_gesture_score: 0, hand_detected: false, handedness: "" };
-}
-
-function fingerExtended(landmarks, tipIdx, pipIdx, mcpIdx) {
-    const tip = landmarks?.[tipIdx];
-    const pip = landmarks?.[pipIdx];
-    const mcp = landmarks?.[mcpIdx];
-    if (!tip || !pip || !mcp) return false;
-    return tip.y < pip.y && pip.y < mcp.y;
-}
-
-function fingerCurled(landmarks, tipIdx, pipIdx) {
-    const tip = landmarks?.[tipIdx];
-    const pip = landmarks?.[pipIdx];
-    if (!tip || !pip) return false;
-    return tip.y > pip.y;
-}
-
-function distance2D(a, b) {
-    if (!a || !b) return 0;
-    const dx = (a.x || 0) - (b.x || 0);
-    const dy = (a.y || 0) - (b.y || 0);
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-function inferGestureFromLandmarks(landmarks) {
-    if (!Array.isArray(landmarks) || landmarks.length < 21) {
-        return { label: "", score: 0 };
-    }
-    const wrist = landmarks[0];
-    const thumbTip = landmarks[4];
-    const thumbIp = landmarks[3];
-    const thumbMcp = landmarks[2];
-    const indexTip = landmarks[8];
-    const indexPip = landmarks[6];
-    const indexMcp = landmarks[5];
-    const middleTip = landmarks[12];
-    const middlePip = landmarks[10];
-    const middleMcp = landmarks[9];
-    const ringTip = landmarks[16];
-    const ringPip = landmarks[14];
-    const ringMcp = landmarks[13];
-    const pinkyTip = landmarks[20];
-    const pinkyPip = landmarks[18];
-    const pinkyMcp = landmarks[17];
-    if (!wrist || !thumbTip || !thumbIp || !thumbMcp || !indexTip || !indexPip || !indexMcp || !middleTip || !middlePip || !middleMcp || !ringTip || !ringPip || !ringMcp || !pinkyTip || !pinkyPip || !pinkyMcp) {
-        return { label: "", score: 0 };
-    }
-
-    const otherCurledCount = [
-        fingerCurled(landmarks, 8, 6),
-        fingerCurled(landmarks, 12, 10),
-        fingerCurled(landmarks, 16, 14),
-        fingerCurled(landmarks, 20, 18),
-    ].filter(Boolean).length;
-    const otherExtendedCount = [
-        fingerExtended(landmarks, 8, 6, 5),
-        fingerExtended(landmarks, 12, 10, 9),
-        fingerExtended(landmarks, 16, 14, 13),
-        fingerExtended(landmarks, 20, 18, 17),
-    ].filter(Boolean).length;
-
-    const curledByReachCount = [
-        distance2D(indexTip, wrist) < distance2D(indexMcp, wrist) * 1.15,
-        distance2D(middleTip, wrist) < distance2D(middleMcp, wrist) * 1.15,
-        distance2D(ringTip, wrist) < distance2D(ringMcp, wrist) * 1.15,
-        distance2D(pinkyTip, wrist) < distance2D(pinkyMcp, wrist) * 1.15,
-    ].filter(Boolean).length;
-    const foldedCount = Math.max(otherCurledCount, curledByReachCount);
-    const thumbLift = thumbIp.y - thumbTip.y;
-    const thumbDrop = thumbTip.y - thumbIp.y;
-    const thumbReach = distance2D(thumbTip, wrist);
-    const thumbBaseReach = distance2D(thumbMcp, wrist);
-    const thumbFar = thumbReach > thumbBaseReach * 1.2;
-
-    const indexBelowThumb = indexTip.y > thumbTip.y + 0.02;
-    const indexAboveThumb = indexTip.y < thumbTip.y - 0.02;
-    const thumbUp = (thumbLift > 0.03 || thumbTip.y < wrist.y - 0.08) && foldedCount >= 2 && thumbFar && indexBelowThumb;
-    const thumbDown = (thumbDrop > 0.03 || thumbTip.y > wrist.y + 0.08) && foldedCount >= 2 && thumbFar && indexAboveThumb;
-    const openPalm = otherExtendedCount >= 4 && thumbTip.y < landmarks[2].y;
-
-    if (thumbUp) {
-        return { label: "Thumb_Up", score: 0.82 };
-    }
-    if (thumbDown) {
-        return { label: "Thumb_Down", score: 0.82 };
-    }
-    if (openPalm) {
-        return { label: "Open_Palm", score: 0.74 };
-    }
-    return { label: "", score: 0 };
 }
 
 async function postJSON(url, body) {
@@ -747,366 +457,35 @@ async function postJSON(url, body) {
     return response.json();
 }
 
-async function getJSON(url) {
-    const response = await fetch(url, {
-        method: "GET",
-        headers: { "X-CSRFToken": getCSRFToken() }
-    });
-    return response.json();
-}
-
-function setVoiceUiState(mode, message = "") {
-    const speakBtn = document.getElementById("speakBtn");
-    const speakAacBtn = document.getElementById("speakAacBtn");
-    const stopBtn = document.getElementById("stopSpeakBtn");
-    const chip = document.getElementById("voiceStatusChip");
-    const pulse = document.getElementById("voicePulse");
-    const text = document.getElementById("voiceStatusText");
-    const active = mode !== "idle";
-    chip.classList.toggle("active", active);
-    stopBtn.classList.toggle("active", mode === "listening");
-    speakBtn.classList.toggle("listening", mode === "listening");
-    speakBtn.innerText = mode === "listening" ? "LISTENING" : "SPEAK";
-    if (speakAacBtn) {
-        speakAacBtn.disabled = mode === "listening" || mode === "processing";
-    }
-    pulse.classList.toggle("cool", mode === "processing" || mode === "speaking");
-    text.innerText = message || (mode === "listening" ? "Listening..." : mode === "processing" ? "Finishing..." : mode === "speaking" ? "Speaking..." : "");
-}
-
-function releaseLiveKitAudioNodes() {
-    livekitAudioNodes.forEach((node) => {
-        try {
-            if (node.parentNode) {
-                node.parentNode.removeChild(node);
-            }
-        } catch (error) {
-            console.debug("audio node cleanup skipped", error);
-        }
-    });
-    livekitAudioNodes = [];
-}
-
-async function disconnectLiveKitRoom(room) {
-    if (!room) return;
-    try {
-        await room.disconnect();
-    } catch (error) {
-        console.debug("room disconnect skipped", error);
-    }
-}
-
-function attachLiveKitAudioTrack(track) {
-    const element = track.attach();
-    element.autoplay = true;
-    element.controls = false;
-    element.style.display = "none";
-    document.body.appendChild(element);
-    livekitAudioNodes.push(element);
-}
-
-function getLiveKitNamespace() {
-    return window.livekit || window.LivekitClient || window.LiveKitClient || null;
-}
-
-async function ensureLiveKitClient() {
-    const existing = getLiveKitNamespace();
-    if (existing) return existing;
-    if (!livekitScriptPromise) {
-        livekitScriptPromise = new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js";
-            script.async = true;
-            script.onload = () => {
-                const loaded = getLiveKitNamespace();
-                if (loaded) {
-                    resolve(loaded);
-                    return;
-                }
-                reject(new Error("LiveKit client loaded but global namespace was not found."));
-            };
-            script.onerror = () => reject(new Error("Failed to load LiveKit client script."));
-            document.head.appendChild(script);
-        });
-    }
-    return livekitScriptPromise;
-}
-
-async function submitPartnerMessage(partnerText, signalOverride = null) {
-    if (!sessionId) {
-        alert("Press START first.");
-        return null;
-    }
-    const cleaned = (partnerText || "").trim();
-    if (!cleaned) {
-        alert("Partner message cannot be empty.");
-        return null;
-    }
-    document.getElementById("partnerInput").value = cleaned;
-    lastPartnerText = cleaned;
-    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
-    let requestSignals = signalOverride;
-    if (!requestSignals) {
-        if (cameraEffective && document.getElementById("cameraToggle").checked) {
-            startCueCaptureWindow(0, 2600);
-            await waitForPostVoiceCueCaptureWindow();
-            requestSignals = finalizePostVoiceCueSignals(buildRequestSignals());
-        } else {
-            await detectFaceSignals();
-            requestSignals = buildRequestSignals();
-        }
-    }
-    lastSubmittedSignals = requestSignals;
-    const data = await postJSON("/aac/api/partner_message/", {
-        session_id: sessionId,
-        partner_text: cleaned,
-        partner_name: document.getElementById("partnerName").value.trim(),
-        camera_on: cameraEffective,
-        face_signals: requestSignals,
-        pb_enabled: document.getElementById("pbToggle").checked,
-        client_now: localNowIso(),
-    });
-    if (data.error) {
-        alert(data.error);
-        return null;
-    }
-    renderNormalOptions(data.options || []);
-    renderDebug(data.debug_info || {});
-    lastQueryId = data.query_id || "";
-    renderMetrics(data.query_metrics_history || []);
-    if (!voiceCaptureActive) {
-        setVoiceUiState("idle");
-    }
-    return data;
-}
-
-async function requestSpeakAacSuggestions() {
-    if (!sessionId) {
-        alert("Press START first.");
-        return null;
-    }
-    await detectFaceSignals();
-    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
-    const requestSignals = buildRequestSignals();
-    lastSubmittedSignals = requestSignals;
-    const data = await postJSON("/aac/api/speak_mode/", {
-        session_id: sessionId,
-        partner_name: document.getElementById("partnerName").value.trim(),
-        camera_on: cameraEffective,
-        face_signals: requestSignals,
-        client_now: localNowIso(),
-    });
-    if (data.error) {
-        alert(data.error);
-        return null;
-    }
-    renderSpeakSuggestions(data.grouped_suggestions || {});
-    renderDebug(data.debug_info || {});
-    return data;
-}
-
-async function startVoiceCapture() {
-    if (!sessionId) {
-        alert("Press START first.");
-        return;
-    }
-    await disconnectLiveKitRoom(livekitPlaybackRoom);
-    livekitPlaybackRoom = null;
-    releaseLiveKitAudioNodes();
-    const LiveKitClient = await ensureLiveKitClient();
-    setVoiceUiState("processing", "Connecting...");
-    const tokenData = await postJSON("/aac/api/livekit/listen_token/", { session_id: sessionId });
-    if (tokenData.error) {
-        setVoiceUiState("idle");
-        alert(tokenData.error);
-        return;
-    }
-    currentVoiceTurnId = tokenData.voice_turn_id || "";
-    const room = new LiveKitClient.Room();
-    room.on(LiveKitClient.RoomEvent.TrackSubscribed, (track) => {
-        if (track.kind === LiveKitClient.Track.Kind.Audio) {
-            attachLiveKitAudioTrack(track);
-        }
-    });
-    await room.connect(tokenData.url, tokenData.token);
-    await room.localParticipant.setMicrophoneEnabled(true);
-    livekitVoiceRoom = room;
-    voiceCaptureActive = true;
-    voiceFeatureActivated = true;
-    setVoiceUiState("listening", "Listening...");
-}
-
-async function stopVoiceCapture() {
-    if (!voiceCaptureActive || !livekitVoiceRoom) return;
-    setVoiceUiState("processing", "Finishing...");
-    try {
-        await livekitVoiceRoom.localParticipant.setMicrophoneEnabled(false);
-    } catch (error) {
-        console.debug("microphone disable skipped", error);
-    }
-    voiceCaptureActive = false;
-    if (document.getElementById("cameraToggle").checked) {
-        startPostVoiceCueCapture();
-    }
-    await pollVoiceTranscript();
-}
-
-async function pollVoiceTranscript() {
-    const voiceTurnId = currentVoiceTurnId;
-    if (!voiceTurnId) {
-        setVoiceUiState("idle");
-        return;
-    }
-    const deadline = Date.now() + 20000;
-    while (Date.now() < deadline) {
-        if (document.getElementById("cameraToggle").checked) {
-            try {
-                await detectFaceSignals();
-            } catch (error) {
-                console.debug("post-voice cue detection skipped", error);
-            }
-        }
-        const data = await getJSON(`/aac/api/livekit/transcript/?session_id=${encodeURIComponent(sessionId)}&voice_turn_id=${encodeURIComponent(voiceTurnId)}`);
-        if (data.error) {
-            await disconnectLiveKitRoom(livekitVoiceRoom);
-            livekitVoiceRoom = null;
-            postVoiceCueCapture = null;
-            setVoiceUiState("idle");
-            alert(data.error);
-            return;
-        }
-        if (data.ready && data.transcript) {
-            await waitForPostVoiceCueCaptureWindow();
-            const cueSignals = finalizePostVoiceCueSignals(buildRequestSignals());
-            currentVoiceTurnId = "";
-            await disconnectLiveKitRoom(livekitVoiceRoom);
-            livekitVoiceRoom = null;
-            setVoiceUiState("idle");
-            await submitPartnerMessage(data.transcript, cueSignals);
-            return;
-        }
-        await new Promise((resolve) => window.setTimeout(resolve, 400));
-    }
-    postVoiceCueCapture = null;
-    currentVoiceTurnId = "";
-    await disconnectLiveKitRoom(livekitVoiceRoom);
-    livekitVoiceRoom = null;
-    setVoiceUiState("idle");
-    alert("LiveKit did not return a final transcript yet. The worker may not be connected, or the turn did not finalize in time.");
-}
-
-async function speakConfirmedResponse(finalText) {
-    if (!voiceFeatureActivated || !sessionId || !(finalText || "").trim()) return;
-    try {
-        const LiveKitClient = await ensureLiveKitClient();
-        const tokenData = await postJSON("/aac/api/livekit/tts_token/", {
-            session_id: sessionId,
-            text: finalText,
-        });
-        if (tokenData.error) {
-            console.warn(tokenData.error);
-            return;
-        }
-        await disconnectLiveKitRoom(livekitPlaybackRoom);
-        releaseLiveKitAudioNodes();
-        setVoiceUiState("speaking", "Speaking...");
-        const room = new LiveKitClient.Room();
-        room.on(LiveKitClient.RoomEvent.TrackSubscribed, (track) => {
-            if (track.kind === LiveKitClient.Track.Kind.Audio) {
-                attachLiveKitAudioTrack(track);
-            }
-        });
-        await room.connect(tokenData.url, tokenData.token);
-        livekitPlaybackRoom = room;
-        const playbackMs = Math.max(3500, Math.min(10000, finalText.length * 90));
-        window.setTimeout(async () => {
-            try {
-                await room.disconnect();
-            } catch (error) {
-                console.debug("playback disconnect skipped", error);
-            }
-            if (livekitPlaybackRoom === room) {
-                livekitPlaybackRoom = null;
-            }
-            releaseLiveKitAudioNodes();
-            setVoiceUiState("idle");
-        }, playbackMs);
-    } catch (error) {
-        console.error(error);
-        setVoiceUiState("idle");
-    }
-}
-
 async function initMediaPipeFace() {
-    if ((faceLandmarkerReady || faceLandmarkerFailed) && (gestureRecognizerReady || gestureRecognizerFailed) && (handLandmarkerReady || handLandmarkerFailed)) return;
+    if (faceLandmarkerReady || faceLandmarkerFailed) return;
     try {
         let visionApi = window.vision || null;
         if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
             const moduleRef = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14");
             visionApi = moduleRef.vision || moduleRef;
         }
-        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker || !visionApi.GestureRecognizer || !visionApi.HandLandmarker) {
+        if (!visionApi || !visionApi.FilesetResolver || !visionApi.FaceLandmarker) {
             throw new Error("MediaPipe tasks-vision did not expose FaceLandmarker");
         }
         const fileset = await visionApi.FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
         );
-        if (!faceLandmarkerReady && !faceLandmarkerFailed) {
-            faceLandmarker = await visionApi.FaceLandmarker.createFromOptions(fileset, {
-                baseOptions: {
-                    modelAssetPath:
-                        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-                },
-                outputFaceBlendshapes: true,
-                outputFacialTransformationMatrixes: true,
-                runningMode: "VIDEO",
-                numFaces: 1,
-            });
-        }
-        if (!gestureRecognizerReady && !gestureRecognizerFailed) {
-            gestureRecognizer = await visionApi.GestureRecognizer.createFromOptions(fileset, {
-                baseOptions: {
-                    modelAssetPath:
-                        "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
-                },
-                runningMode: "VIDEO",
-                numHands: 1,
-            });
-        }
-        if (!handLandmarkerReady && !handLandmarkerFailed) {
-            handLandmarker = await visionApi.HandLandmarker.createFromOptions(fileset, {
-                baseOptions: {
-                    modelAssetPath:
-                        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-                },
-                runningMode: "VIDEO",
-                numHands: 2,
-                minHandDetectionConfidence: 0.15,
-                minHandPresenceConfidence: 0.15,
-                minTrackingConfidence: 0.15,
-            });
-        }
+        faceLandmarker = await visionApi.FaceLandmarker.createFromOptions(fileset, {
+            baseOptions: {
+                modelAssetPath:
+                    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            },
+            outputFaceBlendshapes: true,
+            runningMode: "VIDEO",
+            numFaces: 1,
+        });
         faceLandmarkerReady = true;
-        gestureRecognizerReady = true;
-        handLandmarkerReady = true;
-        faceEngine = "mediapipe-face+hand";
+        faceEngine = "mediapipe";
         faceInitError = "";
-        gestureInitError = "";
-        handInitError = "";
     } catch (error) {
-        const text = error?.message || String(error);
-        if (!faceLandmarkerReady) {
-            faceLandmarkerFailed = true;
-            faceInitError = text;
-        }
-        if (!gestureRecognizerReady) {
-            gestureRecognizerFailed = true;
-            gestureInitError = text;
-        }
-        if (!handLandmarkerReady) {
-            handLandmarkerFailed = true;
-            handInitError = text;
-        }
+        faceLandmarkerFailed = true;
+        faceInitError = error?.message || String(error);
         faceEngine = "fallback";
     }
 }
@@ -1132,16 +511,6 @@ function renderDebug(info) {
     }
     if (document.getElementById("dbgNegativeScore")) {
         document.getElementById("dbgNegativeScore").innerText = info.negative_score ?? "-";
-    }
-    if (document.getElementById("dbgGesture")) {
-        document.getElementById("dbgGesture").innerText = info.hand_gesture_label || lastSubmittedSignals?.hand_gesture_label || "-";
-    }
-    if (document.getElementById("dbgGestureScore")) {
-        const score = info.hand_gesture_score ?? lastSubmittedSignals?.hand_gesture_score;
-        document.getElementById("dbgGestureScore").innerText = score ?? "-";
-    }
-    if (document.getElementById("dbgEngine")) {
-        document.getElementById("dbgEngine").innerText = faceEngine || "-";
     }
     document.getElementById("dbgOrder").innerText = (info.search_order || []).join(" -> ");
     document.getElementById("dbgBuckets").innerText = (info.buckets_chosen || []).join(", ");
@@ -1188,11 +557,12 @@ function renderNormalOptions(options) {
     options.slice(0, 3).forEach((text) => {
         const div = document.createElement("div");
         div.className = "card";
-        div.innerHTML = `<div>${text}</div><button>Select</button>`;
-        div.querySelector("button").onclick = () => {
+        div.innerHTML = `<div>${text}</div><div style="display:flex;gap:6px;margin-top:6px;"><button class="selBtn">Select</button><button class="speakBtn">🔊 Speak</button></div>`;
+        div.querySelector(".selBtn").onclick = () => {
             selectedText = text;
             document.getElementById("customResponse").value = text;
         };
+        div.querySelector(".speakBtn").onclick = () => speakText(text);
         cards.appendChild(div);
     });
 }
@@ -1215,12 +585,13 @@ function renderSpeakSuggestions(grouped) {
         items.forEach((text) => {
             const row = document.createElement("div");
             row.className = "group-item";
-            row.innerHTML = `<div style="flex:1">${text}</div><button>Select</button>`;
-            row.querySelector("button").onclick = () => {
+            row.innerHTML = `<div style="flex:1">${text}</div><button class="selBtn">Select</button><button class="speakBtn">🔊</button>`;
+            row.querySelector(".selBtn").onclick = () => {
                 selectedText = text;
                 document.getElementById("customResponse").value = text;
                 window.scrollTo({ top: 0, behavior: "smooth" });
             };
+            row.querySelector(".speakBtn").onclick = () => speakText(text);
             container.appendChild(row);
         });
         target.appendChild(wrap);
@@ -1234,63 +605,30 @@ function renderTranscript() {
     ).join("");
 }
 
-function showMemoryToast(message = "Memory updated.") {
-    const toast = document.getElementById("memoryToast");
-    const text = document.getElementById("memoryToastText");
-    if (!toast || !text) return;
-    text.innerText = message;
-    toast.style.display = "inline-flex";
-    if (memoryToastTimer) {
-        window.clearTimeout(memoryToastTimer);
-    }
-    memoryToastTimer = window.setTimeout(() => {
-        toast.style.display = "none";
-        memoryToastTimer = null;
-    }, 3200);
-}
-
-function hideMemoryToast() {
-    const toast = document.getElementById("memoryToast");
-    if (!toast) return;
-    toast.style.display = "none";
-    if (memoryToastTimer) {
-        window.clearTimeout(memoryToastTimer);
-        memoryToastTimer = null;
-    }
-}
-
 async function detectFaceSignals() {
     if (document.getElementById("simulateFaceToggle").checked) {
         const preset = document.getElementById("simulateFacePreset").value;
         if (preset === "smile") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.9, confused_prob: 0.05, neutral_prob: 0.05, nod_score: 0.65, shake_score: 0.1, negative_prob: 0.05 }));
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.9, confused_prob: 0.05, neutral_prob: 0.05, nod_score: 0.65, shake_score: 0.1, negative_prob: 0.05 });
+            latestFaceSignals.face_detected = true;
             document.getElementById("faceStatus").innerText = "Simulated face: smile";
         } else if (preset === "confused") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.1, confused_prob: 0.85, neutral_prob: 0.05, nod_score: 0.1, shake_score: 0.3, negative_prob: 0.3 }));
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.1, confused_prob: 0.85, neutral_prob: 0.05, nod_score: 0.1, shake_score: 0.3, negative_prob: 0.3 });
+            latestFaceSignals.face_detected = true;
             document.getElementById("faceStatus").innerText = "Simulated face: confused";
         } else if (preset === "nod_yes") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.35, confused_prob: 0.1, neutral_prob: 0.55, nod_score: 0.85, shake_score: 0.08, negative_prob: 0.05 }));
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.35, confused_prob: 0.1, neutral_prob: 0.55, nod_score: 0.85, shake_score: 0.08, negative_prob: 0.05 });
+            latestFaceSignals.face_detected = true;
             document.getElementById("faceStatus").innerText = "Simulated face: nod yes";
         } else if (preset === "shake_no") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.05, confused_prob: 0.35, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.86, negative_prob: 0.7 }));
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.05, confused_prob: 0.35, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.86, negative_prob: 0.7 });
+            latestFaceSignals.face_detected = true;
             document.getElementById("faceStatus").innerText = "Simulated face: shake no";
-        } else if (preset === "indian_nod") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.12, confused_prob: 0.72, neutral_prob: 0.16, nod_score: 0.12, shake_score: 0.18, negative_prob: 0.08 }));
-            document.getElementById("faceStatus").innerText = "Simulated face: indian nod / unsure";
-        } else if (preset === "thumbs_up") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.45, confused_prob: 0.1, neutral_prob: 0.45, hand_detected: true, hand_gesture_label: "Thumb_Up", hand_gesture_score: 0.92, handedness: "Right" }));
-            document.getElementById("faceStatus").innerText = "Simulated hand: thumbs up";
-        } else if (preset === "thumbs_down") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.05, confused_prob: 0.2, neutral_prob: 0.75, negative_prob: 0.55, hand_detected: true, hand_gesture_label: "Thumb_Down", hand_gesture_score: 0.92, handedness: "Right" }));
-            document.getElementById("faceStatus").innerText = "Simulated hand: thumbs down";
-        } else if (preset === "open_palm") {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline({ smile_prob: 0.15, confused_prob: 0.55, neutral_prob: 0.3, hand_detected: true, hand_gesture_label: "Open_Palm", hand_gesture_score: 0.9, handedness: "Right" }));
-            document.getElementById("faceStatus").innerText = "Simulated hand: open palm";
         } else {
-            latestFaceSignals = smoothFaceSignals(buildNeutralSignalBaseline());
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, nod_score: 0.1, shake_score: 0.1, negative_prob: 0.1 });
+            latestFaceSignals.face_detected = true;
             document.getElementById("faceStatus").innerText = "Simulated face: neutral";
         }
-        updateRecentSignalPeaks(latestFaceSignals);
         return latestFaceSignals;
     }
     if (!document.getElementById("cameraToggle").checked || !stream) {
@@ -1304,13 +642,9 @@ async function detectFaceSignals() {
         status.innerText = "Camera warming up...";
         return latestFaceSignals;
     }
-    const nowMs = Date.now();
-    let rawSignals = buildNeutralSignalBaseline({ face_detected: false });
-    let faceDetected = false;
-    let gestureText = "";
     if (faceLandmarkerReady && faceLandmarker) {
         try {
-            const result = faceLandmarker.detectForVideo(video, nowMs);
+            const result = faceLandmarker.detectForVideo(video, Date.now());
             if (result.faceBlendshapes && result.faceBlendshapes.length > 0) {
                 const categories = result.faceBlendshapes[0].categories || [];
                 const scoreFor = (name) => {
@@ -1341,93 +675,68 @@ async function detectFaceSignals() {
                     yaw = Math.atan2(r20, Math.sqrt(r21 * r21 + r22 * r22)) * 57.2958;
                     if (!Number.isFinite(yaw)) yaw = Math.atan2(-r10, r00) * 57.2958;
                 }
-                headHistory.push({ pitch, yaw, t: nowMs });
+                headHistory.push({ pitch, yaw, t: Date.now() });
                 if (headHistory.length > 16) headHistory = headHistory.slice(-16);
-                const motion = deriveHeadMotionScores(nowMs);
-                const confusedBoost = Math.max(confused, clamp01(motion.wobbleScore * 0.92));
-                const neutralAfterWobble = Math.max(0, 1 - smile - confusedBoost);
-                rawSignals = buildNeutralSignalBaseline({
+                // Live gaze region from current head pose.
+                if (typeof updateGazeFromHead === "function") {
+                    updateGazeFromHead(yaw, pitch);
+                }
+                const recent = headHistory.slice(-12);
+                const pitchRange = recent.length ? Math.max(...recent.map((h) => h.pitch)) - Math.min(...recent.map((h) => h.pitch)) : 0;
+                const yawRange = recent.length ? Math.max(...recent.map((h) => h.yaw)) - Math.min(...recent.map((h) => h.yaw)) : 0;
+                const nodScore = Math.max(0, Math.min(1, (pitchRange - 8) / 15));
+                const shakeScore = Math.max(0, Math.min(1, (yawRange - 10) / 18));
+                latestFaceSignals = smoothFaceSignals({
                     smile_prob: Math.min(1, smile),
-                    confused_prob: Math.min(1, confusedBoost),
-                    neutral_prob: Math.min(1, Math.max(neutral, neutralAfterWobble)),
+                    confused_prob: Math.min(1, confused),
+                    neutral_prob: Math.min(1, neutral),
                     negative_prob: Math.min(1, negative),
-                    nod_score: motion.nodScore,
-                    shake_score: motion.shakeScore,
+                    nod_score: nodScore,
+                    shake_score: shakeScore,
                     face_detected: true,
                 });
-                faceDetected = true;
+                status.innerText = `Face detected (MediaPipe blendshapes) nod:${nodScore.toFixed(2)} shake:${shakeScore.toFixed(2)}`;
+                return latestFaceSignals;
             }
+            status.innerText = "MediaPipe active, face not confidently detected yet";
         } catch (error) {
-            status.innerText = `MediaPipe face error: ${error?.message || "unknown error"}`;
+            status.innerText = `MediaPipe detect error: ${error?.message || "unknown error"}`;
         }
     }
-    if ((gestureRecognizerReady && gestureRecognizer) || (handLandmarkerReady && handLandmarker)) {
-        try {
-            const gestureResult = gestureRecognizerReady && gestureRecognizer ? gestureRecognizer.recognizeForVideo(video, nowMs) : null;
-            const handResult = handLandmarkerReady && handLandmarker ? handLandmarker.detectForVideo(video, nowMs) : null;
-            let gestureCategory = gestureResult?.gestures?.[0]?.[0] || null;
-            const handednessCategory = gestureResult?.handednesses?.[0]?.[0] || null;
-            let label = gestureCategory?.categoryName || "";
-            let score = gestureCategory?.score || 0;
-            let handedness = handednessCategory?.displayName || handednessCategory?.categoryName || "";
-            const landmarks = gestureResult?.landmarks?.[0] || handResult?.landmarks?.[0] || null;
-            if (!handedness) {
-                const handLandmarkerHandedness = handResult?.handednesses?.[0]?.[0] || null;
-                handedness = handLandmarkerHandedness?.displayName || handLandmarkerHandedness?.categoryName || "";
-            }
-            if ((!label || label === "None" || score < 0.45) && landmarks) {
-                const inferred = inferGestureFromLandmarks(landmarks);
-                if (inferred.label && inferred.score > score) {
-                    label = inferred.label;
-                    score = inferred.score;
-                }
-            }
-            const stableGesture = stabilizeGestureLabel(label, score, handedness, nowMs);
-            rawSignals = { ...rawSignals, ...stableGesture };
-            if (stableGesture.hand_detected) {
-                gestureText = `${stableGesture.hand_gesture_label} ${stableGesture.handedness ? `(${stableGesture.handedness})` : ""}`.trim();
-            }
-        } catch (error) {
-            gestureText = "";
-        }
-    }
-    if (!faceDetected && "FaceDetector" in window) {
+    if ("FaceDetector" in window) {
         try {
             const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
             const faces = await detector.detect(video);
             if (faces.length > 0) {
                 const width = faces[0].boundingBox.width || 1;
                 const smileProb = Math.min(1, Math.max(0.2, width / 260));
-                rawSignals = {
-                    ...rawSignals,
+                latestFaceSignals = smoothFaceSignals({
                     smile_prob: smileProb,
                     confused_prob: 1 - smileProb,
-                    neutral_prob: 0.2 + Math.max(0, rawSignals.neutral_prob - 0.2),
+                    neutral_prob: 0.2,
                     negative_prob: 0.15,
                     nod_score: 0.1,
                     shake_score: 0.1,
-                    face_detected: true,
-                };
-                faceDetected = true;
+                });
+                latestFaceSignals.face_detected = true;
+                status.innerText = "Face detected";
+            } else {
+                latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
+                status.innerText = "FaceDetector active but low confidence; using neutral fallback";
             }
         } catch (error) {
+            latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
             status.innerText = `FaceDetector error; neutral fallback (${error?.message || "unknown"})`;
         }
-    }
-    latestFaceSignals = smoothFaceSignals(rawSignals);
-    updateRecentSignalPeaks(latestFaceSignals);
-    recordPostVoiceCueSample(latestFaceSignals, nowMs);
-    const gestureSuffix = gestureText ? ` gesture:${gestureText}` : "";
-    if (faceDetected) {
-        status.innerText = `Vision active (${faceEngine}) nod:${(latestFaceSignals?.nod_score ?? 0).toFixed(2)} shake:${(latestFaceSignals?.shake_score ?? 0).toFixed(2)}${gestureSuffix}`;
-    } else if (latestFaceSignals?.hand_detected) {
-        status.innerText = `Hand gesture detected (${faceEngine})${gestureSuffix}`;
-    } else if (lastStableHandSignal.label && Date.now() - (lastStableHandSignal.updatedAt || 0) <= 7000) {
-        status.innerText = `Recent hand gesture held (${faceEngine}) gesture:${lastStableHandSignal.label}${lastStableHandSignal.handedness ? ` (${lastStableHandSignal.handedness})` : ""}`;
-    } else if (faceLandmarkerFailed && gestureRecognizerFailed && handLandmarkerFailed) {
-        status.innerText = `Vision init failed (${faceInitError || gestureInitError || "unknown"}); using neutral fallback`;
     } else {
-        status.innerText = `Camera active, waiting for stable face/hand signal (${faceEngine})`;
+        latestFaceSignals = smoothFaceSignals({ smile_prob: 0.2, confused_prob: 0.2, neutral_prob: 0.6, negative_prob: 0.1, nod_score: 0.1, shake_score: 0.1, face_detected: true });
+        if (faceLandmarkerFailed) {
+            status.innerText = `No FaceDetector API + MediaPipe init failed (${faceInitError || "unknown"}); neutral fallback`;
+        } else if (faceLandmarkerReady) {
+            status.innerText = "No FaceDetector API; MediaPipe running";
+        } else {
+            status.innerText = "No FaceDetector API; detector warming up";
+        }
     }
     return latestFaceSignals;
 }
@@ -1441,7 +750,7 @@ function startFacePolling() {
         } catch (error) {
             document.getElementById("faceStatus").innerText = `Face polling error: ${error?.message || "unknown"}`;
         }
-    }, 180);
+    }, 850);
 }
 
 function stopFacePolling() {
@@ -1459,7 +768,6 @@ document.getElementById("startBtn").onclick = async () => {
     }
     sessionId = data.session_id;
     document.getElementById("speakBtn").disabled = false;
-    document.getElementById("speakAacBtn").disabled = false;
     document.getElementById("sessionLabel").innerText = `Session: ${sessionId}`;
     document.getElementById("normalCards").innerHTML = "";
     document.getElementById("speakSuggestions").innerHTML = "";
@@ -1471,15 +779,6 @@ document.getElementById("startBtn").onclick = async () => {
     selectedText = "";
     lastPartnerText = "";
     metricsHistory = [];
-    await disconnectLiveKitRoom(livekitVoiceRoom);
-    await disconnectLiveKitRoom(livekitPlaybackRoom);
-    livekitVoiceRoom = null;
-    livekitPlaybackRoom = null;
-    currentVoiceTurnId = "";
-    voiceCaptureActive = false;
-    voiceFeatureActivated = false;
-    releaseLiveKitAudioNodes();
-    setVoiceUiState("idle");
     renderMetrics([]);
 };
 
@@ -1496,17 +795,14 @@ document.getElementById("cameraToggle").onchange = async (event) => {
         } catch (error) {
             stream = null;
             video.hidden = true;
-            document.getElementById("faceStatus").innerText = "Camera unavailable";
+            const name = error?.name || "Error";
+            const msg = error?.message || String(error);
+            document.getElementById("faceStatus").innerText = `Camera unavailable: ${name} — ${msg}`;
+            console.error("getUserMedia failed:", error);
             stopFacePolling();
         }
     } else {
         latestFaceSignals = null;
-        headHistory = [];
-        handHistory = [];
-        motionLatch = { nodUntil: 0, shakeUntil: 0 };
-        recentSignalPeaks = { nod_score: 0, shake_score: 0, confused_prob: 0, negative_prob: 0, hand_gesture_label: "", hand_gesture_score: 0, hand_updated_at: 0, updatedAt: 0 };
-        lastStableHandSignal = { label: "", score: 0, handedness: "", updatedAt: 0 };
-        postVoiceCueCapture = null;
         stopFacePolling();
         if (stream) {
             stream.getTracks().forEach((track) => track.stop());
@@ -1518,56 +814,379 @@ document.getElementById("cameraToggle").onchange = async (event) => {
 };
 
 document.getElementById("sendPartnerBtn").onclick = async () => {
+    if (!sessionId) return alert("Press START first.");
     const partnerText = document.getElementById("partnerInput").value.trim();
-    await submitPartnerMessage(partnerText);
+    if (!partnerText) return alert("Partner message cannot be empty.");
+    lastPartnerText = partnerText;
+    await detectFaceSignals();
+    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const data = await postJSON("/aac/api/partner_message/", {
+        session_id: sessionId,
+        partner_text: partnerText,
+        partner_name: document.getElementById("partnerName").value.trim(),
+        camera_on: cameraEffective,
+        face_signals: latestFaceSignals,
+        pb_enabled: document.getElementById("pbToggle").checked,
+        client_now: localNowIso(),
+        gesture: liveSensors.gesture || null,
+        heart_rate_bpm: liveSensors.hr || null,
+        gaze_region: liveSensors.gaze || null,
+        vocal_polarity: liveSensors.vocal || null,
+        air_sign_letter: liveSensors.airSign || null,
+        facial_emotion: effectiveFacialEmotion(),
+    });
+    if (data.error) return alert(data.error);
+    renderNormalOptions(data.options || []);
+    renderDebug(data.debug_info || {});
+    lastQueryId = data.query_id || "";
+    renderMetrics(data.query_metrics_history || []);
 };
 
 document.getElementById("speakBtn").onclick = async () => {
-    if (voiceCaptureActive) {
-        await stopVoiceCapture();
-        return;
-    }
-    await startVoiceCapture();
-};
-
-document.getElementById("speakAacBtn").onclick = async () => {
-    await requestSpeakAacSuggestions();
-};
-
-document.getElementById("stopSpeakBtn").onclick = async () => {
-    await stopVoiceCapture();
+    if (!sessionId) return alert("Press START first.");
+    await detectFaceSignals();
+    const cameraEffective = document.getElementById("cameraToggle").checked || document.getElementById("simulateFaceToggle").checked;
+    const data = await postJSON("/aac/api/speak_mode/", {
+        session_id: sessionId,
+        camera_on: cameraEffective,
+        face_signals: latestFaceSignals,
+        client_now: localNowIso(),
+    });
+    if (data.error) return alert(data.error);
+    renderSpeakSuggestions(data.grouped_suggestions || {});
+    renderDebug(data.debug_info || {});
 };
 
 document.getElementById("confirmBtn").onclick = async () => {
     if (!sessionId) return alert("Press START first.");
     const finalText = document.getElementById("customResponse").value.trim();
     if (!finalText) return alert("Type or select a response first.");
-    const confirmSignals = lastSubmittedSignals || buildRequestSignals() || latestFaceSignals;
     const data = await postJSON("/aac/api/confirm_response/", {
         session_id: sessionId,
         partner_text: lastPartnerText,
         selected_text: selectedText,
         final_text: finalText,
         memory_update_on: document.getElementById("memoryToggle").checked,
-        face_signals: confirmSignals,
+        face_signals: latestFaceSignals,
         query_id: lastQueryId
     });
     if (data.error) return alert(data.error);
     const ack = data.memory_update_ack ? `\nMemory Ack: ${data.memory_update_ack}` : "";
     document.getElementById("finalOutput").innerText = `Final Output: ${data.final_output}${ack}`;
+    speakText(data.final_output);
     transcript.push({ partner: lastPartnerText, final: data.final_output });
     renderTranscript();
     renderMetrics(data.query_metrics_history || []);
-    if (document.getElementById("memoryToggle").checked && data.memory_update_actions?.stm === "updated") {
-        showMemoryToast("Memory updated.");
-    }
     selectedText = "";
-    speakConfirmedResponse(data.final_output);
 };
 
-document.getElementById("memoryToastClose").onclick = () => {
-    hideMemoryToast();
-};
+// =========================================================================
+// TTS — speak any text via browser SpeechSynthesis
+// =========================================================================
+function speakText(text) {
+    if (!text || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => /en-US|en_US|en-GB/i.test(v.lang) && /Samantha|Google|Microsoft|Alex/i.test(v.name));
+    if (preferred) u.voice = preferred;
+    window.speechSynthesis.speak(u);
+}
+
+// =========================================================================
+// LIVE MULTIMODAL SENSORS
+// =========================================================================
+
+// ---------- 1. Voice (system mic via Web Speech API) ----------
+function classifyVocalPolarity(text) {
+    const t = (text || "").toLowerCase();
+    const pos = ["yes", "yeah", "yep", "sure", "okay", "ok", "love", "great", "totally", "agreed", "absolutely", "let's"];
+    const neg = ["no", "nope", "not", "sorry", "rather", "cannot", "can't", "don't", "won't", "never", "stop"];
+    const clr = ["what", "repeat", "again", "huh", "pardon", "sorry?", "explain", "clarify", "mean"];
+    if (pos.some(w => t.includes(w))) return "positive";
+    if (neg.some(w => t.includes(w))) return "negative";
+    if (clr.some(w => t.includes(w))) return "clarify";
+    return null;
+}
+
+function setupMic() {
+    const btn = document.getElementById("micBtn");
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        btn.disabled = true;
+        btn.textContent = "🎤 Mic unsupported";
+        document.getElementById("vocalLive").textContent = "browser does not support SpeechRecognition";
+        return;
+    }
+    btn.onclick = () => {
+        if (micRecognition) {
+            micRecognition.stop();
+            micRecognition = null;
+            btn.textContent = "🎤 Start mic";
+            return;
+        }
+        const rec = new SR();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = "en-US";
+        rec.onresult = (event) => {
+            let txt = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                txt += event.results[i][0].transcript;
+            }
+            document.getElementById("vocalTranscript").textContent = txt.slice(-60);
+            const pol = classifyVocalPolarity(txt);
+            if (pol) {
+                liveSensors.vocal = pol;
+                document.getElementById("vocalLive").textContent = pol;
+            }
+        };
+        rec.onerror = (e) => { document.getElementById("vocalLive").textContent = `mic error: ${e.error}`; };
+        rec.onend = () => {
+            if (micRecognition === rec) { try { rec.start(); } catch (e) {} }
+        };
+        rec.start();
+        micRecognition = rec;
+        btn.textContent = "🛑 Stop mic";
+    };
+}
+
+// ---------- 2. Heart rate (simulated live stream, drift around 75 bpm) ----------
+function setupHR() {
+    const btn = document.getElementById("hrBtn");
+    btn.onclick = () => {
+        if (hrTimer) {
+            clearInterval(hrTimer);
+            hrTimer = null;
+            btn.textContent = "❤ Start HR";
+            liveSensors.hr = null;
+            document.getElementById("hrLive").textContent = "—";
+            return;
+        }
+        let bpm = 72;
+        const tick = () => {
+            bpm += (Math.random() - 0.5) * 4;
+            bpm = Math.max(58, Math.min(105, bpm));
+            liveSensors.hr = Math.round(bpm);
+            document.getElementById("hrLive").textContent = `${liveSensors.hr} bpm`;
+        };
+        tick();
+        hrTimer = setInterval(tick, 1000);
+        btn.textContent = "🛑 Stop HR";
+    };
+}
+
+// ---------- 3. Gesture (MediaPipe HandLandmarker on system camera) ----------
+async function initHandLandmarker() {
+    if (handLandmarkerReady || handLandmarkerFailed) return;
+    try {
+        const moduleRef = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14");
+        const visionApi = moduleRef.vision || moduleRef;
+        const fileset = await visionApi.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+        handLandmarker = await visionApi.HandLandmarker.createFromOptions(fileset, {
+            baseOptions: {
+                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+            },
+            runningMode: "VIDEO",
+            numHands: 1,
+        });
+        handLandmarkerReady = true;
+    } catch (err) {
+        handLandmarkerFailed = true;
+        document.getElementById("gestureLive").textContent = `hand init failed: ${err?.message || err}`;
+    }
+}
+
+function classifyHandShape(landmarks) {
+    // Landmarks: 0=wrist, 2=thumb_mcp, 4=thumb_tip, 6=index_pip, 8=index_tip,
+    // 10=mid_pip, 12=mid_tip, 14=ring_pip, 16=ring_tip, 18=pinky_pip, 20=pinky_tip
+    const lm = landmarks;
+    const fingerCurled = (tip, pip) => lm[tip].y > lm[pip].y;  // y grows downward
+    const indexCurled = fingerCurled(8, 6);
+    const middleCurled = fingerCurled(12, 10);
+    const ringCurled = fingerCurled(16, 14);
+    const pinkyCurled = fingerCurled(20, 18);
+    const indexExt = !indexCurled, middleExt = !middleCurled, ringExt = !ringCurled, pinkyExt = !pinkyCurled;
+    const allCurled = indexCurled && middleCurled && ringCurled && pinkyCurled;
+    const allExtended = indexExt && middleExt && ringExt && pinkyExt;
+    const thumbTipY = lm[4].y, thumbBaseY = lm[2].y;
+    const thumbUp = thumbTipY < thumbBaseY - 0.04;
+    const thumbDown = thumbTipY > thumbBaseY + 0.04;
+    const thumbOut = Math.abs(lm[4].x - lm[2].x) > 0.08;
+    const wristY = lm[0].y;
+    const handHigh = lm[12].y < wristY - 0.10;  // middle finger above wrist by margin
+
+    let gesture = null, sign = null;
+    // Gestures (polarity cues)
+    if (allCurled && thumbUp) gesture = "thumbs_up";
+    else if (allCurled && thumbDown) gesture = "thumbs_down";
+    else if (allExtended) gesture = "open_palm";
+    else if (indexExt && middleCurled && ringCurled && pinkyCurled) gesture = "point";
+    // ASL-style sign letters (yes/no/clarify proxies)
+    if (indexCurled && middleCurled && ringCurled && pinkyExt && thumbOut) sign = "Y";
+    else if (allCurled && !thumbUp && !thumbDown) sign = "N";  // closed fist neutral
+    else if (allExtended && handHigh) sign = "?";              // palm raised up
+    return { gesture, sign };
+}
+
+function startHandPolling() {
+    if (handPollingTimer) return;
+    handPollingTimer = setInterval(async () => {
+        const video = document.getElementById("cameraPreview");
+        if (!handLandmarkerReady || !video.videoWidth) return;
+        try {
+            const result = handLandmarker.detectForVideo(video, performance.now());
+            if (result.landmarks && result.landmarks.length > 0) {
+                const lm = result.landmarks[0];
+                const shaking = detectHandShake(lm);
+                const { gesture, sign } = classifyHandShape(lm);
+                // Shake wins over thumbs-up/down because side-to-side wave = "not sure".
+                const finalGesture = shaking ? "shake_hand" : gesture;
+                if (finalGesture) {
+                    liveSensors.gesture = finalGesture;
+                    document.getElementById("gestureLive").textContent = shaking
+                        ? "shake_hand (uncertain)"
+                        : finalGesture;
+                } else {
+                    document.getElementById("gestureLive").textContent = "hand detected (no gesture)";
+                }
+                if (sign) {
+                    liveSensors.airSign = sign;
+                    document.getElementById("airLive").textContent = sign;
+                }
+            } else {
+                wristHistory = [];
+                document.getElementById("gestureLive").textContent = "no hand";
+            }
+        } catch (e) { /* ignore */ }
+    }, 250);
+}
+function stopHandPolling() {
+    if (handPollingTimer) { clearInterval(handPollingTimer); handPollingTimer = null; }
+    liveSensors.gesture = null;
+    liveSensors.airSign = null;
+    document.getElementById("gestureLive").textContent = "—";
+    document.getElementById("airLive").textContent = "—";
+}
+
+// ---------- 3b. Hand-shake (wrist x-position oscillation -> "uncertain") ----------
+function detectHandShake(landmarks) {
+    // landmarks[0] = wrist; track x position over ~1.2s window.
+    const wristX = landmarks[0].x;
+    const now = performance.now();
+    wristHistory.push({ x: wristX, t: now });
+    wristHistory = wristHistory.filter((p) => now - p.t < 1200);
+    if (wristHistory.length < 8) return false;
+    let crossings = 0;
+    const xs = wristHistory.map((p) => p.x);
+    const mean = xs.reduce((a, b) => a + b, 0) / xs.length;
+    let prevSide = xs[0] > mean ? 1 : -1;
+    for (let i = 1; i < xs.length; i++) {
+        const side = xs[i] > mean ? 1 : -1;
+        if (side !== prevSide) crossings += 1;
+        prevSide = side;
+    }
+    const range = Math.max(...xs) - Math.min(...xs);
+    // 4+ zero-crossings in ~1.2s with meaningful x-range = side-to-side wave.
+    return crossings >= 4 && range > 0.12;
+}
+
+// ---------- 3c. Facial emotion (face-api.js, FER+ 7-class CNN, 100% local) ----------
+async function initFaceApi() {
+    if (faceApiReady || faceApiFailed) return;
+    if (!window.faceapi) {
+        faceApiFailed = true;
+        document.getElementById("emotionLive").textContent = "face-api.js not loaded";
+        return;
+    }
+    try {
+        const MODEL_URL = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights";
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+        faceApiReady = true;
+        document.getElementById("emotionLive").textContent = "face-api.js ready";
+    } catch (err) {
+        faceApiFailed = true;
+        document.getElementById("emotionLive").textContent = `face-api.js init failed: ${err?.message || err}`;
+    }
+}
+
+function startEmotionPolling() {
+    if (faceApiTimer) return;
+    faceApiTimer = setInterval(async () => {
+        const video = document.getElementById("cameraPreview");
+        if (!faceApiReady || !video.videoWidth) return;
+        try {
+            const result = await faceapi
+                .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 }))
+                .withFaceExpressions();
+            if (result && result.expressions) {
+                let best = "neutral", bestScore = 0;
+                for (const [emo, score] of Object.entries(result.expressions)) {
+                    if (score > bestScore) { best = emo; bestScore = score; }
+                }
+                lastEmotion = best;
+                lastEmotionConf = bestScore;
+                liveSensors.facialEmotion = best;
+                document.getElementById("emotionLive").textContent = `${best} (${bestScore.toFixed(2)})`;
+            }
+        } catch (e) { /* swallow */ }
+    }, 600);
+}
+function stopEmotionPolling() {
+    if (faceApiTimer) { clearInterval(faceApiTimer); faceApiTimer = null; }
+    liveSensors.facialEmotion = null;
+    lastEmotion = null;
+    document.getElementById("emotionLive").textContent = "—";
+}
+
+// Resolve which emotion to send: simulated dropdown wins, else live face-api detection.
+function effectiveFacialEmotion() {
+    const sim = document.getElementById("simulateEmotionPreset").value;
+    if (sim) return sim;
+    if (document.getElementById("cameraToggle").checked && lastEmotion) return lastEmotion;
+    return null;
+}
+
+// ---------- 4. Gaze region (from face landmarker yaw/pitch) ----------
+function updateGazeFromHead(yaw, pitch) {
+    document.getElementById("gazeDebug").textContent = `yaw=${yaw.toFixed(0)} pitch=${pitch.toFixed(0)}`;
+    let region = null;
+    if (yaw > 12) region = "family_photo";       // looking left
+    else if (yaw < -12) region = "work_screen";  // looking right
+    else if (pitch < -10) region = "schedule_panel"; // looking up
+    else if (pitch > 10) region = "med_card";        // looking down
+    else region = "open_panel";                       // straight ahead
+    liveSensors.gaze = region;
+    document.getElementById("gazeLive").textContent = region;
+}
+
+setupMic();
+setupHR();
+
+// Hook hand landmarker + face-api emotion to camera toggle.
+document.getElementById("cameraToggle").addEventListener("change", async (e) => {
+    if (e.target.checked) {
+        await Promise.all([initHandLandmarker(), initFaceApi()]);
+        if (handLandmarkerReady) startHandPolling();
+        if (faceApiReady) startEmotionPolling();
+    } else {
+        stopHandPolling();
+        stopEmotionPolling();
+    }
+});
+
+// Mirror simulated emotion choice into the live chip immediately.
+document.getElementById("simulateEmotionPreset").addEventListener("change", (e) => {
+    if (e.target.value) {
+        document.getElementById("emotionLive").textContent = `simulated: ${e.target.value}`;
+    } else if (!faceApiReady) {
+        document.getElementById("emotionLive").textContent = "—";
+    }
+});
 
 startClock();
 </script>
