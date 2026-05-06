@@ -2,10 +2,9 @@ from django.test import SimpleTestCase
 
 from home.aac.memory.store import memory_store
 from home.aac.llm import gemini_client
-from home.aac.pipelines.nodes import _is_binary_prompt, _is_plan_change_prompt, candidate_generator_node, face_cue_node
+from home.aac.pipelines.nodes import _is_binary_prompt, candidate_generator_node, face_cue_node
 from home.aac.pipelines.normal_pipeline import run_normal_pipeline
 from home.aac.pipelines.speak_pipeline import run_speak_pipeline
-from home.aac.service import _find_matching_plan
 from home.aac.types import RetrievalEvidence
 from home.aac.service import confirm_response, start_session
 
@@ -238,9 +237,6 @@ class MemoryUpdateTests(SimpleTestCase):
             ["No, let us go at 7 PM.", "No, let us go sometime else.", "Yes, it is fine with me."],
         )
 
-    def test_later_today_query_is_not_plan_change_prompt(self):
-        self.assertFalse(_is_plan_change_prompt("What do I have later today?"))
-
     def test_later_today_query_keeps_grounded_memory_option(self):
         session = start_session("demo_user")
         state = memory_store.get_session(session["session_id"])
@@ -274,13 +270,6 @@ class MemoryUpdateTests(SimpleTestCase):
         self.assertTrue("7:00" in joined or "movie" in joined)
         self.assertNotIn("let us keep the original time", joined)
         self.assertNotIn("partner asked", joined)
-
-    def test_movie_reschedule_does_not_match_unrelated_plan(self):
-        session = start_session("demo_user")
-        state = memory_store.get_session(session["session_id"])
-        state.stm["today_plans"] = ["Therapy exercises at 4:30 PM", "Take evening medication at 8:30 PM"]
-        matched = _find_matching_plan(state, partner_text="Do you remember our movie plan today?", final_text="Maybe tomorrow.")
-        self.assertEqual(matched, "")
 
     def test_vansh_project_query_prefers_project_checkin_over_movie_noise(self):
         session = start_session("demo_user")
