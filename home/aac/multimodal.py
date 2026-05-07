@@ -146,7 +146,9 @@ def map_multimodal(
     # 2. Gesture (thumbs-up/down) - strong polarity prior
     # ---------------------------------------------------------------
     if gesture:
-        g = gesture.strip().lower()
+        if isinstance(gesture, dict):
+            gesture = gesture.get("label") or gesture.get("name") or ""
+        g = str(gesture).strip().lower()
         if g in {"thumbs_up", "thumbs-up", "yes", "ok", "agree"}:
             polarity = "positive"
             notes.append("gesture=thumbs_up -> polarity=positive")
