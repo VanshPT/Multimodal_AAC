@@ -6,4 +6,3 @@ __pycache__
 .DS_Store
 *.pyc
 outputs/run_logs.jsonl
-nlp_video.mp4

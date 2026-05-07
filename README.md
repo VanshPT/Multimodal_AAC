@@ -10,6 +10,15 @@ a 5-second SLA, conditioned on face, gesture, gaze, and biosignal channels.
 
 ---
 
+## Demo
+
+A live walkthrough of the system covering all 5 P4 bonuses and the memory
+write/recall loop is included as [`final_demo.mp4`](final_demo.mp4) at the
+repo root. The companion narrated script with side-by-side UI actions and
+spoken lines lives at [docs/demo_recording_script.md](docs/demo_recording_script.md).
+
+---
+
 ## Submission Deliverables
 
 | File | Purpose |
@@ -17,7 +26,7 @@ a 5-second SLA, conditioned on face, gesture, gaze, and biosignal channels.
 | `Final_Report.pdf` | ACL-style technical paper (5 pages + references) |
 | `Final_Report.tex` | LaTeX source for the report |
 | `Final_Slides.pptx` | 10-slide in-class presentation deck |
-| `nlp_video.mp4` | Demo recording (live UI walkthrough) |
+| [`final_demo.mp4`](final_demo.mp4) | Demo recording (live UI walkthrough, 5 bonuses + memory loop) |
 | `outputs/eval_summary.json` | Aggregate evaluation metrics (n=20) |
 | `outputs/eval_rows.json` | Per-case evaluation rows |
 | `outputs/figures/` | All plots referenced by the report and slides |
