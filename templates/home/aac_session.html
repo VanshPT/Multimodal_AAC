@@ -264,6 +264,36 @@
                         <option value="neutral">neutral → neutral</option>
                     </select>
                 </label>
+                <label>Sim Gaze:
+                    <select id="simulateGazePreset" title="Bonus 1 — overrides camera-derived gaze">
+                        <option value="">(none)</option>
+                        <option value="medical">medical</option>
+                        <option value="today_plans">today_plans</option>
+                        <option value="next_days_plans">next_days_plans</option>
+                        <option value="reminders">reminders</option>
+                        <option value="food">food</option>
+                        <option value="family">family</option>
+                        <option value="social">social</option>
+                        <option value="work">work</option>
+                        <option value="routine">routine</option>
+                    </select>
+                </label>
+                <label>Sim Vocal:
+                    <select id="simulateVocalPreset" title="Bonus 2 — vocal channel polarity">
+                        <option value="">(none)</option>
+                        <option value="positive">positive</option>
+                        <option value="negative">negative</option>
+                        <option value="neutral">neutral</option>
+                    </select>
+                </label>
+                <label>Sim Air-Sign:
+                    <select id="simulateAirSignPreset" title="Bonus 2 — deliberate spatial channel">
+                        <option value="">(none)</option>
+                        <option value="Y">Y (yes)</option>
+                        <option value="N">N (no)</option>
+                        <option value="?">? (clarify)</option>
+                    </select>
+                </label>
                 <label><input type="checkbox" id="pbToggle" checked> PB Enabled</label>
                 <button id="speakBtn" disabled>SPEAK</button>
                 <span id="sessionLabel" class="muted">Session not started</span>
@@ -830,9 +860,9 @@ document.getElementById("sendPartnerBtn").onclick = async () => {
         client_now: localNowIso(),
         gesture: liveSensors.gesture || null,
         heart_rate_bpm: liveSensors.hr || null,
-        gaze_region: liveSensors.gaze || null,
-        vocal_polarity: liveSensors.vocal || null,
-        air_sign_letter: liveSensors.airSign || null,
+        gaze_region: (document.getElementById("simulateGazePreset").value || liveSensors.gaze || null),
+        vocal_polarity: (document.getElementById("simulateVocalPreset").value || liveSensors.vocal || null),
+        air_sign_letter: (document.getElementById("simulateAirSignPreset").value || liveSensors.airSign || null),
         facial_emotion: effectiveFacialEmotion(),
     });
     if (data.error) return alert(data.error);
@@ -1103,7 +1133,7 @@ async function initFaceApi() {
         return;
     }
     try {
-        const MODEL_URL = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights";
+        const MODEL_URL = "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights";
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
         faceApiReady = true;
@@ -1166,6 +1196,18 @@ function updateGazeFromHead(yaw, pitch) {
 
 setupMic();
 setupHR();
+
+// Mirror Sim Gaze / Sim Vocal / Sim Air-Sign into the live chips so the panel
+// reflects what will actually be sent on the next partner_message.
+document.getElementById("simulateGazePreset").addEventListener("change", (e) => {
+    if (e.target.value) document.getElementById("gazeLive").textContent = `simulated: ${e.target.value}`;
+});
+document.getElementById("simulateVocalPreset").addEventListener("change", (e) => {
+    if (e.target.value) document.getElementById("vocalLive").textContent = `simulated: ${e.target.value}`;
+});
+document.getElementById("simulateAirSignPreset").addEventListener("change", (e) => {
+    if (e.target.value) document.getElementById("airLive").textContent = `simulated: ${e.target.value}`;
+});
 
 // Hook hand landmarker + face-api emotion to camera toggle.
 document.getElementById("cameraToggle").addEventListener("change", async (e) => {
